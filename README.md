@@ -2,7 +2,7 @@
 
 An interactive, single-page study site for the Project Management course taught by **Dr. Ramita Abdul Rahim**. It walks through 13 chapters of PM theory with hands-on tools — a critical-path timeline, a work-breakdown tree, a risk heat map, a cost/EVM calculator and more — running entirely in the browser with no backend.
 
-**Live site:** https://saifsirhan.github.io/OM-Web-tools/
+**Live site:** https://saifsirhan.github.io/Project-Managment-Tools/
 
 ## Chapters
 01 Project Fundamentals · 02 Identification & Selection · 03 Proposals & Contracts · 04 Scope & WBS · 05 Scheduling · 06 Resources · 07 Cost & EVM · 08 Risk · 09 Closing · 10 PM Role · 11 Teams · 12 Comms · 13 Org Structure
@@ -26,7 +26,7 @@ python -m http.server 8000
 ## Teacher Mode
 Append `?admin=true` to the URL (or click **Teacher Mode** in the footer) to open the card builder:
 
-https://saifsirhan.github.io/OM-Web-tools/?admin=true
+https://saifsirhan.github.io/Project-Managment-Tools/?admin=true
 
 Compose a title, definition and bullet list, watch the exact card preview live, then **Copy HTML** and paste it into `index.html`. This screen only builds markup — it cannot change the site. Use **← Back to Site** to return.
 
