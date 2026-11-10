@@ -1348,39 +1348,52 @@
      .app-layout so the tab router never counts it, and ?admin=true is the only
      thing that opens it. That query is a convenience, not a lock: this screen
      renders a live preview and copies HTML to the clipboard; it cannot write to
-     the site. The grid, spacing and offscreen copy buffer all live in
-     layout.css (.tm-builder / .tm-scratch) — no inline styles in this build. -->
+     the site. The split-screen layout, sticky sidebar and preview canvas live in
+     layout.css (.tm-layout) — no inline styles in this build. -->
   <section id="teacherMode" class="panel" hidden aria-labelledby="tm-heading">
-    <div class="card tm-builder">
-      <div class="tm-controls">
-        <h2 id="tm-heading">Teacher Card Builder</h2>
-        <p>Choose a layout, type your text, and watch the exact card build live.</p>
+    <div class="tm-layout">
+      <!-- Left column: controls -->
+      <div class="tm-sidebar">
+        <div class="tm-header">
+          <h2 id="tm-heading">Card Builder</h2>
+          <p>Compose a card for the students. Copy the HTML when you're done.</p>
+        </div>
 
-        <div class="form-group">
-          <label for="tm-style">Card Style</label>
-          <select id="tm-style">
-            <option value="definition">Definition Card</option>
-            <option value="list">Bullet List Card</option>
-            <option value="numbered">Numbered List Card</option>
+        <div class="tm-group">
+          <label for="tm-title">Card Title</label>
+          <input type="text" id="tm-title" class="tm-input" placeholder="e.g., 01 — WHAT IS A PROJECT" autocomplete="off">
+        </div>
+
+        <div class="tm-group">
+          <label for="tm-def">Definition (Optional)</label>
+          <textarea id="tm-def" class="tm-textarea" rows="3" placeholder="Enter a clear definition..."></textarea>
+        </div>
+
+        <div class="tm-group">
+          <label for="tm-list">Bullet Points (Optional)</label>
+          <textarea id="tm-list" class="tm-textarea" rows="5" placeholder="Enter one bullet point per line..."></textarea>
+        </div>
+
+        <div class="tm-group">
+          <label for="tm-type">Card Type</label>
+          <select id="tm-type" class="tm-select">
+            <option value="standard">Standard Card (Grid)</option>
+            <option value="exhibit">Exhibit Card (Full Width)</option>
           </select>
         </div>
 
-        <div class="form-group">
-          <label for="tm-title">Card Title (e.g., 01 — WHAT IS A PROJECT)</label>
-          <input type="text" id="tm-title" value="01 — WHAT IS A PROJECT" placeholder="Enter title" autocomplete="off">
-        </div>
-
-        <div class="form-group">
-          <label for="tm-body">Body</label>
-          <textarea id="tm-body" rows="8" placeholder="Type the definition, or one list item per line...">A project is a temporary endeavor undertaken to create a unique product, service, or result. It has a defined start and end, and is constrained by scope, time, and cost.</textarea>
-        </div>
+        <button type="button" class="btn-primary" id="tm-copy">Copy HTML</button>
+        <div id="tm-copy-status" class="tm-status" role="status">Copied to clipboard!</div>
       </div>
 
-      <div class="tm-preview">
-        <h2>Live Preview</h2>
-        <p class="tm-hint">This is the exact card students will see. Screenshot it, or copy its HTML below.</p>
-        <div id="tm-preview-container"></div>
-        <button type="button" class="btn-primary" id="tm-copy">Copy HTML to Clipboard</button>
+      <!-- Right column: sticky preview -->
+      <div class="tm-preview-column">
+        <div class="tm-preview-header">Live Preview</div>
+        <div id="tm-preview-container" class="tm-preview-canvas">
+          <!-- The preview card will render here -->
+        </div>
+        <div class="tm-code-header">Generated HTML</div>
+        <textarea id="tm-code-output" class="tm-code-output" readonly spellcheck="false"></textarea>
       </div>
     </div>
   </section>

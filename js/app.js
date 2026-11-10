@@ -2329,14 +2329,69 @@ function updateEVMChart(cbc, cac, ev) {
   if (evmChart) evmChart.set(cbc, cac, ev);
 }
 
-/* ---- teacher mode: the professor builds cards visually ----
-   ?admin=true only decides what this page shows. The screen renders a live
-   preview of the exact card and copies its HTML to the clipboard; it cannot
-   write to the site and holds no secret; the footer link is the whole of the
-   "hidden" part. The shape mirrors the real cards in index.html:
-   section.note-block > h2, then p.definition / ul.attr-list / ol.numbered-list.
-   Titles and prose are escaped because they are pasted back into HTML — a bare
-   "<" in a lesson would otherwise open a tag that never closes. */
+/* ---- student quiz widget ----
+   A .quiz-widget carries its own data as JSON in data-quiz; this turns each one
+   into a question, its options and a feedback line. Idempotent, so Teacher Mode
+   can re-run it on every preview render without doubling the markup. Options
+   are set with textContent, so a lesson never injects HTML through an answer. */
+function initQuizzes(root) {
+  const scope = root || document;
+  scope.querySelectorAll('.quiz-widget').forEach((widget) => {
+    if (widget.dataset.quizReady === '1') return;
+    let data;
+    try {
+      data = JSON.parse(widget.getAttribute('data-quiz') || '{}');
+    } catch (err) {
+      return;
+    }
+    if (!data || !Array.isArray(data.options)) return;
+    widget.dataset.quizReady = '1';
+
+    const heading = document.createElement('h3');
+    heading.textContent = data.question || '';
+    widget.appendChild(heading);
+
+    const feedback = document.createElement('div');
+    feedback.className = 'quiz-feedback';
+
+    const buttons = [];
+    data.options.forEach((optionText, index) => {
+      const letter = String.fromCharCode(65 + index);
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'quiz-option';
+      button.dataset.letter = letter;
+      button.textContent = letter + '. ' + optionText;
+      button.addEventListener('click', () => {
+        if (letter === String(data.correct)) {
+          button.classList.add('correct');
+          feedback.textContent = 'Correct!';
+          feedback.className = 'quiz-feedback correct';
+        } else {
+          button.classList.add('incorrect');
+          buttons.forEach((b) => {
+            if (b.dataset.letter === String(data.correct)) b.classList.add('correct');
+          });
+          feedback.textContent = 'Incorrect.';
+          feedback.className = 'quiz-feedback incorrect';
+        }
+        buttons.forEach((b) => { b.disabled = true; });
+      });
+      buttons.push(button);
+      widget.appendChild(button);
+    });
+
+    widget.appendChild(feedback);
+  });
+}
+
+/* ---- teacher mode: the professor composes cards, nobody edits code ----
+   ?admin=true only decides what this page shows. The left column composes, the
+   right column previews the exact card and its HTML; it cannot write to the
+   site and holds no secret. Titles and prose are escaped because the copied
+   HTML is pasted back into index.html — a bare "<" would otherwise open a tag
+   that never closes. A card is a title, an optional definition and optional
+   bullet points; the type only decides whether it spans the whole board. */
 function initTeacherMode() {
   const panel = document.getElementById('teacherMode');
   if (!panel) return;
@@ -2345,91 +2400,71 @@ function initTeacherMode() {
   document.body.classList.add('teacher-on');
   panel.hidden = false;
 
-  const styleEl = document.getElementById('tm-style');
-  const titleEl = document.getElementById('tm-title');
-  const bodyEl = document.getElementById('tm-body');
-  const preview = document.getElementById('tm-preview-container');
+  const titleInput = document.getElementById('tm-title');
+  const defInput = document.getElementById('tm-def');
+  const listInput = document.getElementById('tm-list');
+  const typeInput = document.getElementById('tm-type');
+  const previewContainer = document.getElementById('tm-preview-container');
+  const codeOutput = document.getElementById('tm-code-output');
   const copyBtn = document.getElementById('tm-copy');
+  const copyStatus = document.getElementById('tm-copy-status');
+
+  if (!titleInput || !previewContainer) return;
 
   const esc = (text) => text.replace(/&/g, '&amp;').replace(/</g, '&lt;');
-  const lines = (text) => text.split('\n').map((line) => line.trim()).filter((line) => line !== '');
 
-  let currentHTML = '';
+  function generateHTML() {
+    const title = esc(titleInput.value.trim() || 'Card Title');
+    const def = defInput.value.trim();
+    const list = listInput.value.trim();
+    const isExhibit = typeInput.value === 'exhibit';
 
-  function renderTeacherPreview() {
-    const style = styleEl.value;
-    const title = titleEl.value.trim();
-
-    let html = '<section class="note-block">\n';
-    html += '  <h2>' + esc(title) + '</h2>\n';
-
-    if (style === 'definition') {
-      const bodyText = bodyEl.value.trim();
-      if (bodyText) html += '  <p class="definition">' + esc(bodyText) + '</p>\n';
-    } else {
-      const items = lines(bodyEl.value);
-      const tag = style === 'numbered' ? 'ol' : 'ul';
-      const cls = style === 'numbered' ? 'numbered-list' : 'attr-list';
-      if (items.length) {
-        html += '  <' + tag + ' class="' + cls + '">\n';
-        for (const item of items) html += '    <li>' + esc(item) + '</li>\n';
-        html += '  </' + tag + '>\n';
-      }
+    let html = '<section class="note-block' + (isExhibit ? ' exhibit' : '') + '">\n';
+    html += '  <h2>' + title + '</h2>\n';
+    if (def) html += '  <p class="definition">' + esc(def) + '</p>\n';
+    if (list) {
+      html += '  <ul class="attr-list">\n';
+      list.split('\n').filter((line) => line.trim() !== '').forEach((item) => {
+        html += '    <li>' + esc(item.trim()) + '</li>\n';
+      });
+      html += '  </ul>\n';
     }
     html += '</section>';
 
-    currentHTML = html;
-    preview.innerHTML = html;
-    // Real cards fog until the scroll observer reveals them; a card born here
-    // was never observed, so clear it by hand to show the finished state. The
-    // copied string stays canonical (no is-visible) to match index.html source.
-    const card = preview.querySelector('.note-block');
-    if (card) card.classList.add('is-visible');
+    codeOutput.value = html;
+    previewContainer.innerHTML = html;
+
+    // A card born here was never handed to the scroll observer, so clear it by
+    // hand. The copied string stays canonical (no is-visible), matching the
+    // source in index.html.
+    const previewCard = previewContainer.querySelector('.note-block');
+    if (previewCard) previewCard.classList.add('is-visible');
   }
 
-  styleEl.addEventListener('input', renderTeacherPreview);
-  titleEl.addEventListener('input', renderTeacherPreview);
-  bodyEl.addEventListener('input', renderTeacherPreview);
-
-  const copyLabel = copyBtn.textContent;
-  let copyTimer = null;
-  const flashCopied = () => {
-    copyBtn.textContent = 'Copied!';
-    clearTimeout(copyTimer);
-    copyTimer = setTimeout(() => { copyBtn.textContent = copyLabel; }, 1600);
-  };
-
-  // file:// is not a secure context, so the async Clipboard API is unavailable
-  // there; the offscreen textarea + execCommand path covers that case.
-  function fallbackCopy() {
-    const scratch = document.createElement('textarea');
-    scratch.className = 'tm-scratch';
-    scratch.value = currentHTML;
-    scratch.setAttribute('readonly', '');
-    document.body.appendChild(scratch);
-    scratch.select();
-    try {
-      document.execCommand('copy');
-      flashCopied();
-    } catch (err) {
-      copyBtn.textContent = 'Copy failed — select the preview';
-      clearTimeout(copyTimer);
-      copyTimer = setTimeout(() => { copyBtn.textContent = copyLabel; }, 2400);
-    }
-    document.body.removeChild(scratch);
-  }
-
-  copyBtn.addEventListener('click', () => {
-    if (navigator.clipboard && window.isSecureContext) {
-      navigator.clipboard.writeText(currentHTML).then(flashCopied).catch(fallbackCopy);
-    } else {
-      fallbackCopy();
-    }
+  [titleInput, defInput, listInput, typeInput].forEach((el) => {
+    el.addEventListener('input', generateHTML);
   });
 
-  renderTeacherPreview();
+  let statusTimer = null;
+  copyBtn.addEventListener('click', () => {
+    // execCommand still works for a user-initiated copy, but some environments
+    // (notably headless) refuse it; fall back to the async Clipboard API when
+    // the page is a secure context, so the teacher always gets the HTML.
+    codeOutput.select();
+    let copied = false;
+    try { copied = document.execCommand('copy'); } catch (err) { copied = false; }
+    if (!copied && navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(codeOutput.value).catch(() => {});
+    }
+    copyStatus.classList.add('show');
+    clearTimeout(statusTimer);
+    statusTimer = setTimeout(() => copyStatus.classList.remove('show'), 2000);
+  });
+
+  generateHTML();
 }
 
 initEVMChart();
 initTeacherMode();
 initGlobalStars();
+initQuizzes();

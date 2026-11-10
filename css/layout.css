@@ -2214,9 +2214,9 @@ tfoot td {
 /* ---- teacher mode: the authoring screen ----
    Opened by ?admin=true, which js/app.js answers with a body class rather than
    inline display tweaks, because this project keeps every rule in these files.
-   The section is a .panel for its measure and rhythm only: the card inside is
-   the visible shell, so the panel hands back its own frame. The panel runs wide
-   enough to hold the two-column .tm-builder at its 1000px measure. */
+   A full-page split screen: the sidebar composes on the left while the preview
+   and the generated HTML stay pinned on the right. The .panel frame hands back
+   its own border and shadow so the page reads as one surface. */
 body.teacher-on .app-layout,
 body.teacher-on .tabbar,
 body.teacher-on .scroll-track {
@@ -2224,81 +2224,279 @@ body.teacher-on .scroll-track {
 }
 
 #teacherMode {
+  background: var(--bg-main);
+  min-height: 100vh;
+  padding: 2rem;
   width: 100%;
-  max-width: 1080px;
-  margin: 2rem auto;
-  padding: 0 1rem;
-  background-color: transparent;
-  border-color: transparent;
+  max-width: none;
+  margin: 0;
+  border: none;
+  border-radius: 0;
   box-shadow: none;
 }
 
-/* Controls on the left, the live card on the right. The .card child-margin
-   rule would offset the second grid item, so the builder hands it back and
-   lets the column gap do the spacing. */
-.tm-builder {
+.tm-layout {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 400px 1fr;
   gap: 2rem;
-  max-width: 1000px;
+  width: 100%;
+  max-width: 1400px;
   margin: 0 auto;
+  align-items: start;
 }
 
-.tm-builder > * + * {
-  margin-top: 0;
+.tm-sidebar {
+  background: var(--bg-card);
+  padding: 2rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  position: sticky;
+  top: 2rem;
 }
 
-.tm-controls h2 {
+.tm-header h2 {
+  font-family: var(--font-serif);
   margin-bottom: 0.5rem;
 }
 
-.tm-controls > p {
+.tm-header p {
+  font-size: 0.85rem;
   color: var(--text-muted);
-  font-size: 0.9rem;
+  margin-bottom: 2rem;
+}
+
+.tm-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
   margin-bottom: 1.5rem;
 }
 
-.tm-preview {
+.tm-group label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+}
+
+.tm-input,
+.tm-textarea,
+.tm-select {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-main);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+}
+
+.tm-input:focus,
+.tm-textarea:focus,
+.tm-select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--ring);
+}
+
+#tm-copy {
+  width: 100%;
+  margin-top: 1rem;
+}
+
+/* Copy is the sidebar's primary action, so it goes bold. The accent is a light
+   lavender in dark theme, where dark ink reads best; the light theme's accent
+   is a deep violet, so the text flips to white there rather than vanishing. */
+.tm-sidebar .btn-primary {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.tm-sidebar .btn-primary:hover {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+  color: #0f172a;
+}
+
+:root[data-theme='light'] .tm-sidebar .btn-primary,
+:root[data-theme='light'] .tm-sidebar .btn-primary:hover {
+  color: #ffffff;
+}
+
+.tm-status {
+  display: none;
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--status-positive);
+  margin-top: 0.5rem;
+  font-weight: 700;
+}
+
+.tm-status.show {
+  display: block;
+}
+
+.tm-preview-column {
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
 
-.tm-preview h2 {
-  margin: 0;
-}
-
-.tm-hint {
+.tm-preview-header,
+.tm-code-header {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
   color: var(--text-muted);
-  font-size: 0.85rem;
+  letter-spacing: 0.05em;
+}
+
+/* The canvas imitates the real page behind a card: the theme's page colour
+   (deep slate #0f172a in dark) plus a gutter, so the preview is judged against
+   the same backdrop the students see. */
+.tm-preview-canvas {
+  padding: 2rem;
+  background: var(--bg-main);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  min-height: 300px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+/* The preview card is always shown: it was never handed to the scroll
+   observer, so skip the fog and its transition entirely rather than fading in
+   on every keystroke. It fills the canvas so the teacher sees the full width. */
+.tm-preview-canvas .note-block {
+  width: 100%;
+  max-width: none;
   margin: 0;
+  display: block;
+  opacity: 1;
+  filter: none;
+  transform: none;
+  transition: border-color var(--dur) ease;
 }
 
-/* Holds its shape before the first keystroke so the columns do not jump. */
-#tm-preview-container {
-  min-height: 120px;
+/* An exhibit spans the whole board on the real site; let it stretch here too. */
+.note-block.exhibit {
+  grid-column: 1 / -1;
 }
 
-#tm-copy {
-  align-self: flex-start;
+.tm-preview-canvas .note-block.exhibit {
+  max-width: none;
 }
 
-/* The clipboard fallback selects an offscreen buffer; it must not paint or
-   take focus space, and it carries a class so no inline style is needed. */
-.tm-scratch {
-  position: fixed;
-  top: 0;
-  left: -9999px;
-  width: 1px;
-  height: 1px;
-  opacity: 0;
-  pointer-events: none;
+.tm-code-output {
+  width: 100%;
+  height: 200px;
+  padding: 1rem;
+  font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
+  font-size: 0.85rem;
+  background: #1e1e1e;
+  color: #d4d4d4;
+  border: none;
+  border-radius: var(--radius);
+  resize: vertical;
 }
 
-@media (max-width: 800px) {
-  .tm-builder {
+@media (max-width: 900px) {
+  .tm-layout {
     grid-template-columns: 1fr;
   }
+
+  .tm-sidebar {
+    position: static;
+  }
+}
+
+/* ---- teacher quiz: the authoring toggle and the student widget ----
+   The quiz is the one card style that stays interactive, so Teacher Mode
+   reveals the answer key and the preview runs the real student widget. */
+.tm-quiz-controls {
+  display: none;
+  margin-top: 1rem;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 4px;
+}
+
+.tm-quiz-controls.is-visible {
+  display: block;
+}
+
+.tm-quiz-hint {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.quiz-widget {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: var(--shadow);
+  font-family: var(--font-sans);
+}
+
+.quiz-widget h3 {
+  font-family: var(--font-serif);
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+  color: var(--cinematic-text);
+}
+
+.quiz-option {
+  -webkit-appearance: none;
+  appearance: none;
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 0.75rem 1rem;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: var(--text-primary);
+}
+
+.quiz-option:hover {
+  background: var(--bg-main);
+  border-color: var(--accent);
+}
+
+.quiz-option.correct {
+  background: rgba(16, 185, 129, 0.1);
+  border-color: var(--status-positive);
+  color: var(--status-positive);
+}
+
+.quiz-option.incorrect {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: var(--status-negative);
+  color: var(--status-negative);
+}
+
+.quiz-feedback {
+  margin-top: 1rem;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.quiz-feedback.correct {
+  color: var(--status-positive);
+}
+
+.quiz-feedback.incorrect {
+  color: var(--status-negative);
 }
 
 .teacher-link {
