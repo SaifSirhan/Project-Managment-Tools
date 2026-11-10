@@ -1,0 +1,3111 @@
+/* =============================================================
+   PM Tools · layout
+   Shell, masthead, tab bar, sidebar, panels, grids, responsive steps.
+   Colours and skins come from theme.css.
+   ============================================================= */
+
+/* One rail for every band: masthead, tab bar, sidebar + content, footer. */
+.shell {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+/* ---- masthead: nameplate left, controls right ---- */
+.site-header {
+  padding: 28px 0 22px;
+  background-color: var(--bg-card);
+  border-bottom: 4px double var(--border);
+}
+
+.site-header .shell {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.theme-toggle {
+  padding: 8px 14px;
+  white-space: nowrap;
+}
+
+/* ---- tab bar ---- */
+.tabbar {
+  position: sticky;
+  top: 0;
+  /* Above the rail (11): a tooltip belongs to the bar the reader is pointing at,
+     not to the column it happens to overlap. */
+  z-index: 12;
+  background-color: var(--bg-main);
+  border-bottom: 1px solid var(--border);
+  box-shadow: var(--shadow);
+}
+
+/* ---- texture: the same grain the page carries, under the three UI bands ----
+   Each band keeps its own background-color, so the paper reads at two tones:
+   masthead and rail on the card colour, the tab bar on the page colour. */
+.site-header,
+.tabbar,
+.sidebar {
+  background-image: var(--noise-texture);
+  /* The tile has no intrinsic size of its own; without this it stretches to the
+     band instead of repeating the 200px cell the body uses. */
+  background-size: 200px 200px;
+  border-color: var(--border);
+}
+
+.tabbar .shell {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  /* Numbers only: thirteen circles need two rows on a phone and one everywhere
+     else, so the strip never needs a scrollbar. `visible`, not `hidden`, keeps
+     the hover tooltip from being clipped — a clipped axis would also turn the
+     bar into a scroll container. */
+  overflow: visible;
+}
+
+.tab {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  font-size: 0.9rem;
+  font-weight: 700;
+  border-radius: 50%;
+  color: var(--text-secondary);
+  border: 1px solid transparent;
+  transition: all 0.2s;
+}
+
+.tab:hover,
+.tab.active {
+  background-color: var(--bg-card);
+  color: var(--accent);
+  border-color: var(--border);
+  box-shadow: var(--shadow);
+}
+
+/* ---- tab tooltip: the title the number stands for ---- */
+.tab::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  background-color: var(--bg-card);
+  border: 1px solid var(--border);
+  padding: 6px 12px;
+  border-radius: var(--radius);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  color: var(--text-primary);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  z-index: 100;
+  box-shadow: var(--shadow);
+}
+
+.tab:hover::after,
+.tab:focus-visible::after {
+  opacity: 1;
+  transform: translateX(-50%) translateY(5px);
+}
+
+/* The end circles would push their bubble past the viewport edge, and a hidden
+   axis cannot hold it, so those two anchor to their own side instead. */
+@media (max-width: 900px) {
+  .tab:first-child::after {
+    left: 0;
+    transform: translateY(10px);
+  }
+
+  .tab:first-child:hover::after,
+  .tab:first-child:focus-visible::after {
+    transform: translateY(5px);
+  }
+
+  .tab:last-child::after {
+    left: auto;
+    right: 0;
+    transform: translateY(10px);
+  }
+
+  .tab:last-child:hover::after,
+  .tab:last-child:focus-visible::after {
+    transform: translateY(5px);
+  }
+}
+
+/* ---- course map: a sticky rail beside the reading column ---- */
+.app-layout {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+  align-items: start;
+}
+
+.main-content {
+  /* A grid item with `margin: 0 auto` shrink-wraps to fit-content, which lets a
+     narrow sheet (CH02, four cards) drag the whole column down until its
+     auto-fit grid collapses to one column. Fill the track instead. */
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.sidebar {
+  position: sticky;
+  top: 100px;
+  /* Above the viewport fog (z 10): the wash fades cards as they enter, not the
+     navigation chrome. */
+  z-index: 11;
+  /* Longhand: the shared texture rule above sets background-image, and a
+     `background` shorthand here would wipe it out. */
+  background-color: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1.5rem;
+  /* Thirteen chapters: on a short viewport the map is taller than the space
+     under the tab bar, so it scrolls rather than running off the page. */
+  max-height: calc(100vh - 124px);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+  transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s ease,
+    visibility 0s linear 0s;
+}
+
+/* The rail steps aside while the reader is on the hero or the cinematic band.
+   Visibility is the part opacity cannot do: it keeps the fourteen links out of
+   the tab order, delayed so the fade finishes first.
+   Stacked, the rail is part of the reading flow: hiding it would push the
+   notes up under the band, which would then bring the rail back — so on a
+   phone the map stays put and only the desktop rail steps aside. */
+@media (min-width: 901px) {
+  .sidebar.is-retracted {
+    transform: translateX(-30px);
+    opacity: 0;
+    pointer-events: none;
+    visibility: hidden;
+    transition-delay: 0s, 0s, 0.5s;
+  }
+}
+
+/* The rail owns the bottom-left corner now, so the reading preference floats on
+   the other side; the dot track sits mid-height and never shares that corner. */
+#themeToggle {
+  right: 24px;
+  left: auto;
+}
+
+.sidebar-title {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  font-weight: 600; /* an h2 for the outline, but it reads as a rail label */
+  margin-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.5rem;
+}
+
+.sidebar-link {
+  display: block;
+  padding: 0.5rem 0;
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 0.9rem;
+  border-bottom: 1px solid transparent;
+  transition: color var(--dur) ease;
+}
+
+.sidebar-link:last-child {
+  border-bottom: none;
+}
+
+.sidebar-link:hover,
+.sidebar-link.active {
+  color: var(--accent);
+  font-weight: 500;
+}
+
+/* ---- sidebar nesting: a chapter and the tool that belongs to it ---- */
+.sidebar-group {
+  margin: 0;
+  padding: 0;
+}
+
+.sidebar-sublink {
+  padding-left: 1.5rem !important;
+  font-size: 0.85rem !important;
+  border-bottom: none !important;
+}
+
+/* The parent stays lit while you are reading its child tool. */
+.sidebar-link.active-parent {
+  color: var(--accent-ink);
+}
+
+/* ---- hero: the first screen of chapter 01 ---- */
+.hero-section {
+  /* Full bleed so the introduction centres on the viewport, not on the reading
+     column that sits right of the reserved rail track. */
+  width: 100cqw;
+  margin-left: calc(50% - 50cqw);
+  padding: 4rem 2rem;
+  text-align: center;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 2rem;
+}
+
+@media (min-width: 901px) {
+  .hero-section {
+    margin-left: calc(50% - 50cqw - 146px);
+  }
+}
+
+.hero-title {
+  font-size: 2.5rem;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+}
+
+.hero-subtitle {
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  max-width: 600px;
+  margin: 0 auto 2rem auto;
+}
+
+.btn-hero {
+  padding: 1rem 2rem;
+  font-size: 1rem;
+}
+
+body {
+  container-type: inline-size;
+}
+
+/* ---- the page floor ----
+   One fixed plane for the whole document: the wash and grain the body used to
+   paint, with the grid on top of them, and the star canvas above that. The
+   layers sit at negative z-index, so the body must stay transparent or they
+   would be hidden behind its own paint. Only the fixed planes are viewport
+   sized; the sheets and tools still scroll over them. */
+html {
+  background-color: var(--bg-main);
+}
+
+.global-grid-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  background-color: var(--bg-main);
+  background-image:
+    linear-gradient(var(--cinematic-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--cinematic-grid) 1px, transparent 1px),
+    var(--noise-texture),
+    linear-gradient(180deg, var(--bg-gradient-top) 0%, var(--bg-main) 100%);
+  background-size: 40px 40px, 40px 40px, 200px 200px, 100% 100%;
+  background-repeat: repeat, repeat, repeat, no-repeat;
+  transition: background-color var(--dur) ease;
+}
+
+#globalStarCanvas {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  /* A canvas is a replaced element: inset alone leaves it at 300x150. The
+     percentages resolve against the fixed containing block, so the bitmap
+     spans the layout viewport without the scrollbar overhang of 100vw. */
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* Both cinematic bands share one full-bleed shell; the chapter-specific rules
+   below only add their own instruments. */
+.cinematic-band {
+  grid-column: 1 / -1;
+  position: relative;
+  width: 100cqw;
+  margin-left: calc(50% - 50cqw);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: transparent;
+  color: var(--cinematic-text);
+  border-block: 1px solid var(--cinematic-rule);
+}
+
+.cinematic-timeline {
+  --track-label: 120px;
+  /* The signal colours are the status inks: #10b981 on cream is 2.3:1, so the
+     light stage reads the darker green and dark keeps the neon it was built with. */
+  --finish-color: #047857;
+}
+
+:root[data-theme='dark'] .cinematic-timeline {
+  --finish-color: #10b981;
+}
+
+/* The rail column is always reserved, retracted or not, so the reading column's
+   centre stays 146px right of the viewport centre. */
+@media (min-width: 901px) {
+  .cinematic-band {
+    margin-left: calc(50% - 50cqw - 146px);
+  }
+}
+
+/* The scene holds for one viewport of scroll, then the next sheet slides over
+   it. Below the rail breakpoint the band is taller than the screen on a phone,
+   so it keeps scrolling in flow instead of pinning and clipping. */
+@media (min-width: 901px) {
+  .band-hold {
+    min-height: 200vh;
+  }
+
+  .cinematic-band {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+  }
+}
+
+/* ---- tool bands ----
+   CH07 and the CH09-CH11 tools are taller than one screen. They take the same
+   shell and the same domain expansion, but the band grows with its instrument
+   instead of pinning a clipped screenful. */
+.cinematic-band.tool-band {
+  height: auto;
+  min-height: 100vh;
+  align-items: flex-start;
+  overflow: visible;
+  font-family: var(--font-sans);
+}
+
+@media (min-width: 901px) {
+  .cinematic-band.tool-band {
+    position: relative;
+    top: auto;
+  }
+}
+
+.cinematic-band.tool-band .cinematic-content {
+  max-width: 1040px;
+  padding-block: 6rem 4rem;
+}
+
+.tool-sheet {
+  width: 100%;
+  padding: clamp(1.25rem, 3vw, 2.5rem);
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  background: var(--bg-card);
+  border: 1px solid var(--cinematic-rule);
+  border-radius: var(--radius);
+  text-align: left;
+}
+
+/* Inside the sheet the card is only a divider, not a second surface. */
+.tool-band .card {
+  background: transparent;
+  border: 0;
+  border-top: 1px solid var(--cinematic-rule);
+  border-radius: 0;
+  padding: 1.5rem 0 0;
+  box-shadow: none;
+}
+
+.tool-band .interactive-placeholder {
+  width: 100%;
+  background: var(--bg-sunken);
+  border-color: var(--cinematic-rule);
+}
+
+/* Headings inside a band belong to the display face; prose and controls stay
+   on the sans stack. */
+.cinematic-band h2,
+.cinematic-band h3 {
+  font-family: var(--font-serif);
+}
+
+/* Both canvases ride the accent: the EVM heartbeat already draws its own neon
+   bars, and the tree's connectors pick up the same halo. */
+#evmChart {
+  filter: drop-shadow(0 0 10px var(--cinematic-glow));
+}
+
+.cinematic-wbs .wbs-tree {
+  filter: drop-shadow(0 0 10px var(--cinematic-glow));
+}
+
+/* ---- bouncy interactions ----
+   One spring curve for every control the visitor can press or drag. */
+button,
+input,
+select,
+textarea,
+.tab {
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* These two carry a later class transition of their own, so name them to keep
+   the spring. */
+button.btn-nav,
+.theme-toggle {
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.criteria-row:hover,
+.eq-bar-wrapper:hover {
+  transform: translateY(-2px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .criteria-row:hover,
+  .eq-bar-wrapper:hover {
+    transform: none;
+  }
+}
+
+/* Fourth wall: the laser reaches the edge of the page and the frame cracks. */
+.cracked-edge {
+  position: fixed;
+  inset: 0;
+  z-index: 900;
+  pointer-events: none;
+  opacity: 0;
+  box-shadow: inset 0 0 0 3px rgba(239, 68, 68, 0), inset 0 0 90px 20px rgba(239, 68, 68, 0);
+  transition: opacity 0.4s ease, box-shadow 0.4s ease;
+}
+
+body.fourth-wall .cracked-edge {
+  opacity: 1;
+  box-shadow: inset 0 0 0 3px rgba(239, 68, 68, 0.75), inset 0 0 90px 20px rgba(239, 68, 68, 0.35);
+  animation: crackFlicker 0.9s steps(2, end) infinite;
+}
+
+.cinematic-band.fourth-wall .cinematic-content {
+  animation: glitchShift 0.42s steps(3, end) infinite;
+}
+
+.cinematic-band.fourth-wall .timeline-status {
+  text-shadow: 2px 0 0 rgba(167, 139, 250, 0.8), -2px 0 0 rgba(34, 211, 238, 0.8);
+}
+
+@keyframes crackFlicker {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+
+@keyframes glitchShift {
+  0% { transform: translate3d(0, 0, 0); }
+  33% { transform: translate3d(-3px, 1px, 0); }
+  66% { transform: translate3d(2px, -2px, 0); }
+  100% { transform: translate3d(0, 0, 0); }
+}
+
+/* At the footer the crack reads as a stray glowing border, so the page-end
+   class drops the frame and the band's bottom rule. */
+body.at-bottom .cracked-edge {
+  opacity: 0;
+  box-shadow: none;
+  animation: none;
+}
+
+body.at-bottom .cinematic-band {
+  border-bottom: none;
+}
+
+/* The domain opens from a point to cover the whole band. Its colour is the
+   theme's, always: a status never repaints the sky. */
+.domain-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-color: var(--cinematic-bg);
+  background-image: radial-gradient(circle at center, var(--cinematic-bg-core) 0%, var(--cinematic-bg) 70%);
+  clip-path: circle(0% at 50% 50%);
+  transition: clip-path 1.5s cubic-bezier(0.4, 0, 0.2, 1),
+    background 0.8s ease, filter 0.8s ease;
+  pointer-events: none;
+}
+
+.cinematic-band.is-active .domain-bg {
+  clip-path: circle(150% at 50% 50%);
+}
+
+/* The sphere is the only geometry this page animates, and only while it
+   opens: the promoted layer is handed back once the sequence settles. */
+.cinematic-band.is-active:not(.is-settled) .domain-bg {
+  will-change: clip-path;
+}
+
+/* Once the sequence has played out, the glow dims so the work takes focus.
+   Only the dark sphere wants that: brightness(0.6) over a cream stage is mud,
+   which is why the light bands keep their own settle filter. */
+.cinematic-band.is-settled .domain-bg {
+  filter: none;
+}
+
+:root[data-theme='dark'] .cinematic-band.is-settled .domain-bg {
+  filter: brightness(0.6);
+}
+
+/* Delay is a status, not a mood. The alert colour moves the laser, its glow
+   and the readout; the sky behind them stays the theme's, because a red wash
+   at 100vh reads as an alarm on the whole page rather than on the schedule. */
+.cinematic-timeline.delayed {
+  --finish-color: var(--status-negative-ink);
+}
+
+:root[data-theme='dark'] .cinematic-timeline.delayed {
+  --finish-color: var(--status-negative);
+}
+
+/* Delay reads as a clean solid red rule, not a neon sign: the line glow, the
+   label glow and the readout's text-shadow are what made a late schedule look
+   haunted. The colour stays; the blur goes. */
+.cinematic-timeline.delayed .finish-line {
+  background: var(--status-negative);
+  box-shadow: none;
+}
+
+.cinematic-timeline.delayed .finish-label {
+  box-shadow: none;
+}
+
+.cinematic-timeline.delayed .timeline-status {
+  text-shadow: none;
+}
+
+/* The grid lives inside the sphere, so it expands with it. */
+.domain-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(var(--cinematic-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--cinematic-grid) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+.cinematic-content {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 1000px;
+  padding: 4rem 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  perspective: 1000px;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 1s ease, transform 1s ease;
+}
+
+/* The particle field sits between the sphere and the sheet, and never eats a drag. */
+.particle-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0;
+  transition: opacity 2s ease;
+}
+
+.cinematic-band.is-active .particle-canvas {
+  opacity: 1;
+  transition-delay: 1s;
+}
+
+/* The plane the tracks live on; the tilt is written to a constructed sheet. */
+.tilt-wrapper {
+  width: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.1s ease-out;
+}
+
+.cinematic-band.is-active .cinematic-content {
+  opacity: 1;
+  transform: translateY(0);
+  transition-delay: 0.8s;
+}
+
+.timeline-header {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  margin-bottom: 4rem;
+}
+
+.cinematic-title {
+  font-family: var(--font-serif);
+  font-size: 3rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--cinematic-text);
+  margin-bottom: 1rem;
+  text-shadow: 0 0 30px var(--cinematic-glow);
+  transition: text-shadow 0.8s ease;
+}
+
+.cinematic-band.is-settled .cinematic-title {
+  text-shadow: 0 0 18px var(--cinematic-glow-settled);
+}
+
+.cinematic-subtitle {
+  color: var(--cinematic-text-muted);
+  font-size: 1rem;
+}
+
+.timeline-title {
+  display: block;
+  font-family: var(--font-serif);
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.timeline-subtitle {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.timeline-track-container {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+  padding-bottom: 4rem;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 1s ease, transform 1s ease;
+}
+
+.cinematic-band.is-active .timeline-track-container {
+  opacity: 1;
+  transform: translateY(0);
+  transition-delay: 1.5s;
+}
+
+.timeline-status {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.cinematic-band.is-active .timeline-status {
+  opacity: 1;
+  transform: translateY(0);
+  /* Only the reveal waits its turn; the alert colour must react instantly. */
+  transition-delay: 2.4s, 2.4s, 0s, 0s;
+}
+
+/* The controls stay inert until the sequence has finished. */
+.cinematic-timeline:not(.is-settled) .task-block {
+  pointer-events: none;
+  cursor: default;
+}
+
+/* Leaving the band snaps the reveal back to its closed frame, so a quick
+   re-entry still plays the whole sequence from the start. */
+.cinematic-band.is-reset .domain-bg,
+.cinematic-band.is-reset .cinematic-content,
+.cinematic-band.is-reset .timeline-track-container,
+.cinematic-band.is-reset .wbs-tree-container,
+.cinematic-band.is-reset .timeline-status {
+  transition: none;
+}
+
+/* ---- chapter 03: the core ----
+   The one band that follows the theme. Light gets a warm paper sky and amber
+   flares; dark keeps the deep-space ink. The scene owns the left column and the
+   notes ride up the right, so the object stays visible while the reader works. */
+.ch03-hold {
+  position: relative;
+}
+
+.ch03-band {
+  color: var(--text-primary);
+  border-block-color: var(--border);
+  /* Where the object sits and how far the star field reaches. app.js reads
+     these, so the split stays a CSS decision instead of a JS breakpoint. */
+  --scene-object-x: 0.3;
+  --scene-field-x1: 0.62;
+  justify-content: flex-start;
+  /* The scene is grabbable; a horizontal drag spins it and a vertical one
+     still scrolls the chapter. */
+  cursor: grab;
+  touch-action: pan-y;
+}
+
+.ch03-band.is-dragging {
+  cursor: grabbing;
+}
+
+/* The copy is text first: it must not look like a handle. */
+.ch03-band .ch03-content {
+  cursor: auto;
+}
+
+.ch03-band .domain-bg {
+  background: radial-gradient(circle at 30% 44%, #fffdf6 0%, #f7f1e2 48%, #e9dfca 100%);
+}
+
+.ch03-band .domain-bg::after {
+  background-image:
+    linear-gradient(rgba(120, 92, 32, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(120, 92, 32, 0.08) 1px, transparent 1px);
+}
+
+.ch03-band .cinematic-title {
+  color: var(--text-primary);
+  text-shadow: 0 0 34px rgba(217, 119, 6, 0.25);
+}
+
+.ch03-band.is-settled .cinematic-title {
+  text-shadow: 0 0 16px rgba(217, 119, 6, 0.16);
+}
+
+/* The shared settle dim is tuned for the dark sphere; on warm paper it reads
+   as mud, and the scene never sits under the notes column anyway. */
+.ch03-band.is-settled .domain-bg {
+  filter: none;
+}
+
+.ch03-band .cinematic-subtitle {
+  color: var(--text-secondary);
+  max-width: 34ch;
+}
+
+.ch03-content {
+  z-index: 3;
+  /* 460px keeps the copy clear of the notes column's left edge at 1280px. */
+  max-width: 460px;
+  margin-left: clamp(1.5rem, 6vw, 5.5rem);
+  align-items: flex-start;
+  text-align: left;
+  padding: 4rem 1.5rem;
+}
+
+.ch03-eyebrow {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  /* Amber-700 rather than the token: the token amber is 3.4:1 on the sky. */
+  color: #b45309;
+  margin-bottom: 1.1rem;
+}
+
+.ch03-cue {
+  margin-top: 2.4rem;
+  font-size: 0.7rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* The wireframe sits over the sky and under the stars. */
+.ch03-core {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 1.6s ease;
+}
+
+.ch03-band .particle-canvas {
+  z-index: 2;
+}
+
+.ch03-band.is-active .ch03-core {
+  opacity: 1;
+  /* Matches the title's return instead of the 2.2s first-reveal fade. */
+  transition-duration: 0.9s;
+  transition-delay: 0.25s;
+}
+
+/* The notes column. On a phone it is the ordinary sheet, at the ordinary
+   measure. From 901px it slides over the live scene, and its skin becomes a
+   token scope: every rule in notes.css reads these variables, so re-declaring
+   them there turns the whole note system into dark glass for this column. */
+.ch03-sheet {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  padding: 2.75rem 0 1.5rem;
+  /* The sheet spans the stage, but only its own column should take a pointer. */
+  pointer-events: none;
+}
+
+.ch03-sheet > * {
+  pointer-events: auto;
+}
+
+@media (min-width: 901px) {
+  /* Full bleed, then pushed right: the same escape the band uses, so object
+     and notes share one coordinate system instead of two. */
+  .ch03-sheet {
+    width: 100cqw;
+    margin-left: calc(50% - 50cqw - 146px);
+    align-items: flex-end;
+    padding: 3rem clamp(1.5rem, 8vw, 6.5rem) 2.5rem 2rem;
+    /* Light: glass the colour of paper. The stage behind it is cream now, so
+       the notes keep the page's own ink and only borrow the transparency. */
+    --bg-card: rgba(255, 255, 255, 0.85);
+    --bg-sunken: rgba(255, 255, 255, 0.6);
+    --border: rgba(30, 27, 46, 0.14);
+    --shadow: 0 20px 44px -14px rgba(30, 27, 46, 0.28);
+  }
+
+  /* Dark: the same column is an inverted island. notes.css reads every colour
+     from these variables, so re-declaring them turns the whole note system into
+     dark glass without touching a single card rule. */
+  :root[data-theme='dark'] .ch03-sheet {
+    --bg-card: rgba(15, 23, 42, 0.92);
+    --bg-sunken: rgba(11, 17, 32, 0.72);
+    --bg-main: #0b1120;
+    --text-primary: #f8fafc;
+    --text-secondary: #cbd5e1;
+    --text-muted: #94a3b8;
+    --border: rgba(255, 255, 255, 0.15);
+    --accent: #a78bfa;
+    --accent-hover: #c4b5fd;
+    --accent-secondary: #fbbf24;
+    --accent-ink: #c4b5fd;
+    --accent-contrast: #172033;
+    --tint: rgba(167, 139, 250, 0.16);
+    --tint-strong: rgba(167, 139, 250, 0.3);
+    --ring: rgba(167, 139, 250, 0.45);
+    --shadow: 0 20px 44px -14px rgba(2, 6, 23, 0.6);
+  }
+
+  .ch03-sheet > * {
+    width: min(550px, 100%);
+  }
+
+  /* The blur is what stops the moving scene vibrating through the text. Half
+     a viewport of glass already costs more than the scene behind it, so it
+     stays at 6px and the card carries the rest of the contrast. */
+  .ch03-sheet .note-block {
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+  }
+
+  /* No blur support: the card goes nearly solid, so the reader never sees the
+     scene through the words. */
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .ch03-sheet {
+      --bg-card: rgba(255, 255, 255, 0.97);
+    }
+
+    :root[data-theme='dark'] .ch03-sheet {
+      --bg-card: rgba(15, 23, 42, 0.97);
+    }
+  }
+}
+
+@media (max-width: 900px) {
+  /* Two columns need two columns of room. On a phone the scene centres, the
+     field spreads wide again, and the notes take the full measure. */
+  .ch03-band {
+    --scene-object-x: 0.5;
+    --scene-field-x1: 1;
+    justify-content: center;
+  }
+
+  .ch03-band .domain-bg {
+    background: radial-gradient(circle at 50% 42%, #fffdf6 0%, #f7f1e2 48%, #e9dfca 100%);
+  }
+
+  .ch03-content {
+    margin-left: 0;
+    max-width: 1000px;
+    align-items: center;
+    text-align: center;
+  }
+
+  .ch03-band .cinematic-subtitle {
+    max-width: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ch03-core {
+    transition: none;
+  }
+
+  /* The scene is already still here, so the blur is pure cost. */
+  .ch03-sheet .note-block {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
+/* Dark keeps the shell the other bands live in. */
+:root[data-theme='dark'] .ch03-band {
+  color: #fff;
+  border-block-color: rgba(255, 255, 255, 0.1);
+}
+
+:root[data-theme='dark'] .ch03-band .domain-bg {
+  background: radial-gradient(circle at center, #171033 0%, #05050b 72%);
+}
+
+:root[data-theme='dark'] .ch03-band .domain-bg::after {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+}
+
+:root[data-theme='dark'] .ch03-band .cinematic-title {
+  color: var(--cinematic-text);
+  text-shadow: 0 0 30px rgba(167, 139, 250, 0.5);
+}
+
+:root[data-theme='dark'] .ch03-band .cinematic-subtitle {
+  color: var(--cinematic-text-muted);
+}
+
+:root[data-theme='dark'] .ch03-band.is-settled .domain-bg {
+  filter: brightness(0.6);
+}
+
+:root[data-theme='dark'] .ch03-band .ch03-eyebrow {
+  color: var(--accent-secondary);
+}
+
+:root[data-theme='dark'] .ch03-cue {
+  color: #8a93a8;
+}
+
+:root[data-theme='dark'] .ch03-sheet {
+  box-shadow: 0 -30px 60px rgba(0, 0, 0, 0.45);
+}
+
+.timeline-track {
+  display: flex;
+  align-items: center;
+  height: 60px;
+}
+
+.track-label {
+  width: var(--track-label);
+  flex: none;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  color: var(--cinematic-text-muted);
+  text-align: right;
+  padding-right: 2rem;
+}
+
+.track-blocks {
+  position: relative;
+  flex: 1;
+  height: 100%;
+  border-left: 1px solid var(--cinematic-rule);
+}
+
+.task-block {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font: 700 0.9rem var(--font-sans);
+  letter-spacing: 0.05em;
+  color: white;
+  border-radius: 8px;
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+  text-transform: uppercase;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s;
+}
+
+.task-block.is-dragging {
+  z-index: 10;
+  cursor: grabbing;
+  transform: scale(1.05) translateY(-5px);
+}
+
+.track-blocks[data-track="critical"] .task-block {
+  background-color: rgba(76, 29, 149, 0.2);
+  border: 2px solid #7c3aed;
+  box-shadow: 0 0 20px rgba(124, 58, 237, 0.4), inset 0 0 10px rgba(124, 58, 237, 0.4);
+}
+
+.track-blocks[data-track="critical"] .task-block:hover,
+.track-blocks[data-track="critical"] .task-block.is-dragging {
+  box-shadow: 0 0 30px rgba(124, 58, 237, 0.8), inset 0 0 15px rgba(124, 58, 237, 0.6);
+}
+
+.track-blocks[data-track="slack"] .task-block {
+  background-color: rgba(217, 119, 6, 0.2);
+  border: 2px solid #d97706;
+  box-shadow: 0 0 20px rgba(217, 119, 6, 0.4), inset 0 0 10px rgba(217, 119, 6, 0.4);
+}
+
+/* A 20% wash glows over black and turns to pastel over paper, which left the
+   white task names at 1.6:1. On the light stage the bars take a solid body and
+   keep the same hue, border and glow. */
+:root[data-theme='light'] .track-blocks[data-track="critical"] .task-block {
+  background-color: #5b21b6;
+}
+
+:root[data-theme='light'] .track-blocks[data-track="slack"] .task-block {
+  background-color: #b45309;
+}
+
+/* Base plan: 0–15 design, 15–50 build, 50–70 test; docs float in the slack. */
+[data-track="critical"] [data-id="design"] { left: 0; width: 15%; }
+[data-track="critical"] [data-id="build"] { left: 15%; width: 35%; }
+[data-track="critical"] [data-id="test"] { left: 50%; width: 20%; }
+[data-track="slack"] [data-id="docs"] { left: 0; width: 30%; }
+
+.finish-line {
+  position: absolute;
+  top: -20px;
+  bottom: -20px;
+  width: 2px;
+  pointer-events: none;
+  background-color: var(--finish-color);
+  left: calc(var(--track-label) + (100% - var(--track-label)) * 0.7);
+  box-shadow: 0 0 15px var(--finish-color), 0 0 30px var(--finish-color);
+  transition: left 0.1s linear, background-color 0.4s, box-shadow 0.4s;
+}
+
+/* The blurred laser pulse is retired: a schedule finish is a rule, not a beam. */
+.finish-laser {
+  display: none;
+}
+
+.finish-label {
+  position: absolute;
+  top: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: var(--finish-color);
+  color: #050508;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  padding: 4px 10px;
+  border-radius: 4px;
+  white-space: nowrap;
+  box-shadow: 0 0 10px var(--finish-color);
+  transition: background-color 0.4s, box-shadow 0.4s;
+}
+
+.timeline-status {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  font-family: var(--font-sans);
+  font-weight: 800;
+  font-size: 1.2rem;
+  letter-spacing: 0.2em;
+  color: var(--finish-color);
+  margin-top: 1rem;
+  text-transform: uppercase;
+  text-shadow: 0 0 10px var(--finish-color);
+  transition: opacity 0.8s ease, transform 0.8s ease, color 0.4s, text-shadow 0.4s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cinematic-timeline,
+  .domain-bg,
+  .cinematic-content,
+  .cinematic-title,
+  .timeline-track-container,
+  .cinematic-timeline .task-block,
+  .cinematic-timeline .finish-line,
+  .cinematic-timeline .finish-label,
+  .cinematic-timeline .timeline-status { transition: none; }
+  .tilt-wrapper { transition: none; transform: none !important; }
+  .particle-canvas { transition: none; opacity: 1; }
+  .cracked-edge { transition: none; }
+  body.fourth-wall .cracked-edge { animation: none; }
+  .cinematic-band.fourth-wall .cinematic-content { animation: none; }
+  .task-block.is-dragging { transform: none; }
+}
+
+/* The tool CTA sits at the end of its chapter, on the reading edge. */
+.tool-cta-wrapper {
+  margin-top: 3rem;
+  display: flex;
+  justify-content: flex-start; /* Bottom left */
+}
+
+/* ---- hidden tab: still in the router's order, out of the top bar ---- */
+.tab.hidden {
+  display: none;
+}
+
+/* ---- chapter steps: both directions, at the foot of every sheet ---- */
+.nav-controls {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
+}
+
+.btn-nav {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  padding: 0.75rem 1.25rem;
+  border-radius: var(--radius);
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+  transition: transform var(--dur) ease, border-color var(--dur) ease,
+    color var(--dur) ease, background-color var(--dur) ease;
+}
+
+/* When only one step is left, the forward one still keeps the right edge. */
+.btn-next {
+  margin-left: auto;
+}
+
+.btn-nav:hover {
+  border-color: var(--accent-secondary);
+  color: var(--accent-secondary);
+  transform: translateY(-2px);
+}
+
+.btn-nav svg {
+  flex: none;
+}
+
+.btn-nav.hidden {
+  display: none;
+}
+
+/* ---- back to the chapter that owns a tool ---- */
+.btn-back {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+  padding: 0;
+  align-self: flex-start;
+  transition: color var(--dur) ease;
+}
+
+.btn-back:hover {
+  color: var(--accent);
+}
+
+/* ---- panels ---- */
+.tab-panels {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-width: 0; /* a grid track is min-content by default; long tables must be able to shrink */
+}
+
+section[hidden] {
+  display: none;
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  padding: 28px;
+}
+
+/* The notes sheet is a page, so it hugs its own reading column. */
+.panel:has(.notes) {
+  width: 100%;
+  max-width: 800px;
+  margin-inline: auto;
+}
+
+/* With the notes as cards, the sheet itself becomes the page: the gradient and
+   grain read between the cards instead of hiding behind a white panel. */
+.panel:has(.notes-content),
+/* A tool that lives in a band brings its own sheet, so the panel behind it is
+   just floor. */
+.panel:has(> .cinematic-band) {
+  background-color: transparent;
+  border-color: transparent;
+  box-shadow: none;
+}
+
+/* The hero anchor lands below the sticky tab bar. */
+#notes-start {
+  scroll-margin-top: 64px;
+}
+
+/* ---- tool slots ----
+   A tool that has not been built yet still needs to read as a reserved slot,
+   not as a broken card: dashed edge, sunken well, a centred label. */
+.interactive-placeholder {
+  background-color: var(--bg-sunken);
+  border: 2px dashed var(--border);
+  border-radius: var(--radius);
+  padding: 3rem 1rem;
+  margin-top: 1rem;
+}
+
+.placeholder-label {
+  color: var(--text-muted);
+  text-align: center;
+}
+
+/* ---- tab change: the sheet settles into place ---- */
+@keyframes slideFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    /* `none`, not translateY(0): `forwards` keeps the end value forever, and an
+       identity matrix still makes .panel a containing block for the bands. */
+    transform: none;
+  }
+}
+
+.panel.active {
+  animation: slideFadeIn 0.45s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panel.active {
+    animation: none;
+  }
+
+  /* The rail still arrives, it just does not spring there. */
+  .sidebar {
+    transition: none;
+  }
+
+  .btn-nav,
+  .btn-nav:hover {
+    transform: none;
+  }
+}
+
+/* ---- calculator inputs ---- */
+.top-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field input,
+.field select {
+  width: 100%;
+  padding: 10px 12px;
+}
+
+/* ---- weekly table ---- */
+.table-wrap {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow-x: auto;
+}
+
+.table-wrap table {
+  min-width: 560px;
+}
+
+thead th {
+  padding: 11px 14px;
+}
+
+tbody td {
+  padding: 6px 10px;
+}
+
+tbody input {
+  width: 100%;
+  min-width: 96px;
+  padding: 7px 10px;
+}
+
+tfoot td {
+  padding: 13px 14px;
+}
+
+/* The scorecard total is a rule and weight, not a filled band. */
+#scorecardTable tfoot td {
+  background: transparent;
+  border-top: 2px solid var(--border);
+  font-weight: 700; /* the heaviest Lato weight this site loads */
+}
+
+/* ---- results ---- */
+.results-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.result-card {
+  display: flex;
+  flex-direction: column;
+  padding: 18px;
+}
+
+/* ---- EVM heartbeat ---- */
+.evm-chart-card {
+  margin-top: 2rem;
+}
+
+.evm-chart-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px 20px;
+}
+
+.chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+}
+
+.chart-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.chart-key {
+  width: 16px;
+  height: 3px;
+  border-radius: var(--radius-pill);
+}
+
+.chart-key--cbc {
+  background: repeating-linear-gradient(90deg, var(--accent) 0 5px, transparent 5px 9px);
+}
+
+.chart-key--cac {
+  background: var(--status-negative);
+}
+
+.chart-key--cev {
+  background: var(--status-positive);
+}
+
+.chart-container {
+  position: relative;
+  width: 100%;
+  height: 250px;
+  margin-top: 1rem;
+}
+
+#evmChart {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* ---- forecast method ---- */
+.fcac-section {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 20px;
+}
+
+.fcac-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.radio-option {
+  padding: 12px 14px;
+}
+
+.reestimate-row {
+  padding: 12px 14px;
+}
+
+.reestimate-row input {
+  width: 210px;
+  max-width: 50%;
+  padding: 8px 12px;
+}
+
+.btn-primary,
+.btn-reset {
+  padding: 10px 22px;
+}
+
+.btn-reset {
+  align-self: flex-end;
+}
+
+/* ---- scorecard tool ---- */
+.card {
+  padding: 24px;
+}
+
+.card > * + * {
+  margin-top: 14px;
+}
+
+#scorecardTable {
+  min-width: 760px;
+}
+
+/* Criteria and Comments are prose: left-aligned and given the wider columns. */
+#scorecardTable th:nth-child(1),
+#scorecardTable td:nth-child(1),
+#scorecardTable th:nth-child(5),
+#scorecardTable td:nth-child(5) {
+  width: 27%;
+  text-align: left;
+}
+
+#scorecardTable th:nth-child(2),
+#scorecardTable th:nth-child(3) {
+  width: 12%;
+}
+
+#scorecardTable th:nth-child(4) {
+  width: 14%;
+}
+
+#scorecardTable th:nth-child(6),
+#scorecardTable td:nth-child(6) {
+  width: 8%;
+  text-align: center;
+}
+
+#scorecardTable input[type='text'] {
+  text-align: left;
+}
+
+.scorecard-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1.5rem;
+}
+
+.weight-warning {
+  margin-top: 1rem;
+}
+
+/* ---- footer ---- */
+.site-footer {
+  /* The lower band is left clear for the floating theme toggle, which would
+     otherwise sit on top of this line at the end of every page. */
+  padding: 18px 0 72px;
+  background-color: var(--bg-card);
+  border-top: 1px solid var(--border);
+}
+
+/* ---- scroll track ----
+   One dot per card in the open sheet, kept clear of the reading column by the
+   same gutter the floating toggle uses. js/app.js adds .has-dots only when the
+   sheet actually has cards, so the track never sits empty over a tool. */
+.scroll-track {
+  position: fixed;
+  right: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 100;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.scroll-track.has-dots {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.scroll-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  cursor: pointer;
+  border: none;
+  padding: 0;
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+    background-color 0.3s ease, box-shadow 0.3s ease, opacity 0.3s ease;
+}
+
+/* The overshoot in that curve is the bop; the glow only rides with it. Amber is
+   the marker colour: it lights the dot you are on and, on the step buttons, the
+   direction you are about to take. */
+.scroll-dot.active {
+  background: var(--accent-secondary);
+  transform: scale(1.8);
+  box-shadow: 0 0 12px var(--accent-secondary);
+}
+
+.scroll-dot:hover:not(.active) {
+  background: var(--accent-secondary);
+  opacity: 0.6;
+  transform: scale(1.2);
+}
+
+/* ---- responsive ---- */
+@media (max-width: 900px) {
+  /* One column: the rail stacks above the sheet instead of sitting beside it. */
+  .app-layout {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .sidebar {
+    position: static;
+    width: auto;
+    /* Stacked, the rail is just a section of the page: no inner scroll well. */
+    max-height: none;
+    overflow: visible;
+    padding-bottom: 1.5rem;
+  }
+
+  /* No room for a third column of navigation once the sheet is full width. */
+  .scroll-track {
+    display: none;
+  }
+
+  .results-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .site-header {
+    padding-top: 22px;
+  }
+
+  .site-header .shell {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+  }
+
+  .site-title {
+    font-size: 1.3rem;
+  }
+
+  .tabbar .shell {
+    gap: 0; /* the base rule already keeps the row on one line and scrolls it */
+  }
+
+  .tab {
+    padding: 12px 14px;
+  }
+
+  .panel {
+    padding: 20px 16px;
+  }
+
+  .hero-section {
+    padding: 2.5rem 1rem;
+  }
+
+  .hero-title {
+    font-size: 1.75rem;
+  }
+
+  .hero-subtitle {
+    font-size: 1rem;
+  }
+
+  .btn-hero {
+    padding: 0.85rem 1.5rem;
+  }
+
+  .cinematic-band {
+    min-height: 80vh;
+  }
+
+  .cinematic-timeline {
+    --track-label: 0px;
+  }
+
+  .cinematic-content { padding: 3rem 1rem; }
+  .cinematic-title { font-size: 2rem; }
+  .cinematic-timeline .timeline-header { margin-bottom: 3rem; }
+  .cinematic-timeline .finish-line { display: none; }
+
+  .timeline-track {
+    flex-direction: column;
+    align-items: stretch;
+    height: auto;
+    gap: 4px;
+  }
+
+  .track-label {
+    width: 100%;
+    text-align: left;
+    padding-right: 0;
+  }
+
+  .track-blocks {
+    flex: none;
+    width: 100%;
+    height: 50px;
+    border-left: none;
+    border-top: 1px solid var(--cinematic-rule);
+  }
+
+  .task-block {
+    font-size: 0.6rem;
+    letter-spacing: 0;
+  }
+
+  .top-row,
+  .results-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .reestimate-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .reestimate-row input {
+    width: 100%;
+    max-width: 100%;
+    text-align: left;
+  }
+
+  .btn-reset {
+    align-self: stretch;
+  }
+}
+
+/* ---- chapter 02: the selection matrix ----
+   The band reuses CH01's shell, sphere and field. Bar heights are dynamic, so
+   js/app.js writes them through a constructable stylesheet rather than inline
+   styles; this file only owns the skin. */
+.cinematic-scale .scale-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: end;
+  width: 100%;
+  max-width: 900px;
+  margin-top: 2rem;
+}
+
+.scale-context {
+  max-width: 600px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.scale-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+
+/* The number shares the slider's line: the label takes its own row, then the
+   track and the value sit on one baseline and stay centred together. */
+.scale-controls .criteria-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: 12px;
+  row-gap: 0.5rem;
+}
+
+.scale-controls .criteria-row label {
+  grid-column: 1 / -1;
+}
+
+.scale-controls .criteria-row input[type='range'] {
+  grid-column: 1;
+}
+
+.scale-controls .criteria-row .val-display {
+  grid-column: 2;
+  min-width: 2ch;
+  text-align: right;
+  font-size: 1.2rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.criteria-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.criteria-row label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--cinematic-text-muted);
+}
+
+.val-display {
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--cinematic-text);
+}
+
+/* The visible thumb is 18px; the 24px input box keeps the touch target above
+   the 24px minimum without changing the track. */
+.criteria-row input[type='range'] {
+  width: 100%;
+  height: 24px;
+  appearance: none;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.criteria-row input[type='range']::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: 3px;
+  background: #333;
+}
+
+.criteria-row input[type='range']::-webkit-slider-thumb {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  margin-top: -6px;
+  border-radius: 50%;
+  background: #7c3aed;
+  box-shadow: 0 0 10px #7c3aed;
+}
+
+.criteria-row input[type='range']::-moz-range-track {
+  height: 6px;
+  border-radius: 3px;
+  background: #333;
+}
+
+.criteria-row input[type='range']::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border: none;
+  border-radius: 50%;
+  background: #7c3aed;
+  box-shadow: 0 0 10px #7c3aed;
+}
+
+.criteria-row input[type='range']:focus-visible {
+  outline: 2px solid #a78bfa;
+  outline-offset: 4px;
+}
+
+/* The equalizer grows from a shared baseline instead of a horizontal scale. */
+.equalizer-container {
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-end;
+  gap: 2rem;
+  height: 300px;
+  border-bottom: 2px solid var(--cinematic-rule);
+  padding-bottom: 10px;
+}
+
+.eq-bar-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 1rem;
+  width: 80px;
+  height: 100%;
+}
+
+.eq-bar {
+  position: relative;
+  width: 100%;
+  height: 10%;
+  border-radius: 4px 4px 0 0;
+  background: linear-gradient(to top, rgba(76, 29, 149, 0.2), #7c3aed);
+  border: 1px solid #7c3aed;
+  box-shadow: 0 0 15px rgba(124, 58, 237, 0.4), inset 0 0 10px rgba(124, 58, 237, 0.4);
+  transition: height 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s,
+    background 0.3s, border-color 0.3s;
+}
+
+.eq-bar.winner {
+  background: linear-gradient(to top, rgba(16, 185, 129, 0.2), #10b981);
+  border-color: #10b981;
+  box-shadow: 0 0 30px rgba(16, 185, 129, 0.8), inset 0 0 15px rgba(16, 185, 129, 0.6);
+}
+
+.eq-label {
+  font-family: var(--font-serif);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--cinematic-text);
+}
+
+.eq-bar-wrapper.winner .eq-label {
+  color: #047857;
+  text-shadow: 0 0 10px rgba(4, 120, 87, 0.35);
+}
+
+:root[data-theme='dark'] .eq-bar-wrapper.winner .eq-label {
+  color: #10b981;
+  text-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+}
+
+.eq-points {
+  position: absolute;
+  top: -35px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 2px 8px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg-card);
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  font-weight: 700;
+  white-space: nowrap;
+  color: var(--cinematic-text);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.eq-bar:hover .eq-points,
+.eq-bar:focus-within .eq-points {
+  opacity: 1;
+}
+
+@media (max-width: 700px) {
+  .cinematic-scale .scale-layout {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .equalizer-container {
+    height: 220px;
+    gap: 1rem;
+  }
+
+  .eq-bar-wrapper {
+    width: 64px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .eq-bar,
+  .eq-points {
+    transition: none;
+  }
+}
+
+
+/* ---- chapter 04: the work breakdown ----
+   The tree now lives in the same full-bleed shell as CH01–CH03, so the bleed,
+   the sticky hold, the sphere and the particle reveal all come from
+   .cinematic-band. Only the tree's own scroll and its neon skin are added
+   here, and the skin is scoped to the band so the light-mode tokens elsewhere
+   keep working for any other WBS markup. */
+.wbs-tree-container {
+  width: 100%;
+  padding: 0 1rem;
+  text-align: left;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(124, 58, 237, 0.5) transparent;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 1s ease, transform 1s ease;
+}
+
+.cinematic-band.is-active .wbs-tree-container {
+  opacity: 1;
+  transform: translateY(0);
+  transition-delay: 1.5s;
+}
+
+/* ---- neon nodes ---- */
+.cinematic-wbs .wbs-node {
+  background-color: rgba(15, 23, 42, 0.8);
+  border-color: rgba(124, 58, 237, 0.4);
+  color: #fff;
+}
+
+.cinematic-wbs .wbs-node:hover {
+  border-color: #7c3aed;
+}
+
+.cinematic-wbs .root-node {
+  background-color: #7c3aed;
+  border-color: #a78bfa;
+  color: #fff;
+}
+
+.cinematic-wbs .root-node:hover {
+  background-color: #6d28d9;
+  border-color: #a78bfa;
+  color: #fff;
+}
+
+.cinematic-wbs .l1-node {
+  border-left-color: #7c3aed;
+}
+
+/* #94a3b8 rather than the spec's #888: 4.8:1 → 6.6:1 on the collapsed leaf. */
+.cinematic-wbs .leaf-node {
+  background-color: rgba(15, 23, 42, 0.4);
+  color: #94a3b8;
+}
+
+/* The tree keeps its dark skin when the stage turns cream, but a skin at 40%
+   over paper is not a skin: the muted leaf text measured 1.1:1. In light the
+   leaf cards go nearly solid and take the lighter slate. */
+:root[data-theme='light'] .cinematic-wbs .leaf-node {
+  background-color: rgba(15, 23, 42, 0.85);
+  color: #cbd5e1;
+}
+
+/* ---- laser connectors ---- */
+.cinematic-wbs .wbs-branch > .wbs-node::after {
+  background-color: #7c3aed;
+  box-shadow: 0 0 10px rgba(124, 58, 237, 0.9);
+  height: 2px;
+}
+
+/* The rail only exists while the branch is open, so the glow rides with it. */
+.cinematic-wbs .wbs-children.is-open {
+  border-left-color: rgba(124, 58, 237, 0.5);
+  box-shadow: -2px 0 10px rgba(124, 58, 237, 0.2);
+}
+
+.wbs-tree {
+  display: flex;
+  align-items: center;
+  padding: 2rem 0;
+}
+
+/* Centre the tree while it fits the band; auto margins fall back to zero once
+   it is wider, so the overflow still scrolls from its real left edge. */
+.cinematic-wbs .wbs-tree {
+  width: max-content;
+  margin-inline: auto;
+}
+
+.wbs-branch {
+  display: flex;
+  align-items: center;
+}
+
+/* ---- nodes ---- */
+.wbs-node {
+  background-color: var(--bg-main);
+  border: 1px solid var(--border);
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius);
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.wbs-node:hover {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+}
+
+.root-node {
+  background-color: var(--accent);
+  color: var(--accent-contrast);
+  border-color: var(--accent);
+}
+
+.root-node:hover {
+  background-color: var(--accent-hover);
+  border-color: var(--accent-hover);
+  color: var(--accent-contrast);
+}
+
+.l1-node {
+  border-left: 3px solid var(--accent);
+}
+
+.leaf-node {
+  background-color: var(--bg-card);
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  cursor: default;
+}
+
+/* ---- connecting lines ---- */
+.wbs-branch > .wbs-node::after {
+  content: '';
+  position: absolute;
+  right: -1rem;
+  top: 50%;
+  width: 1rem;
+  height: 1px;
+  background-color: var(--border);
+  display: none;
+}
+
+/* The line only exists while the branch it points at is open. */
+.wbs-branch > .wbs-node:has(+ .wbs-children.is-open)::after {
+  display: block;
+}
+
+/* ---- children container: collapsed by default ----
+   A closed branch collapses to zero width instead of only fading, so the tree
+   grows to the right like a horizontal accordion; visibility keeps the hidden
+   buttons out of the tab order. */
+.wbs-children {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-left: 0;
+  padding-left: 0;
+  border-left: 1px solid transparent;
+  position: relative;
+  max-width: 0;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateX(-20px);
+  pointer-events: none;
+  visibility: hidden;
+  transition: max-width 0.35s ease, margin-left 0.35s ease, padding-left 0.35s ease,
+    border-left-color 0.35s ease, opacity 0.3s ease, transform 0.3s ease,
+    visibility 0s linear 0.35s;
+}
+
+.wbs-children.is-open {
+  max-width: 34rem;
+  margin-left: 1.5rem;
+  padding-left: 1rem;
+  border-left-color: var(--border);
+  opacity: 1;
+  transform: translateX(0);
+  pointer-events: auto;
+  visibility: visible;
+  transition-delay: 0s;
+}
+
+/* A nested open container would otherwise re-show itself inside a collapsed
+   ancestor, because visibility is explicitly set to visible. */
+.wbs-children:not(.is-open) .wbs-children {
+  visibility: hidden;
+}
+
+/* ---- shatter pop ---- */
+@keyframes shatterIn {
+  0% {
+    opacity: 0;
+    transform: translateX(-30px) scale(0.8);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+.wbs-children.is-open > .wbs-branch,
+.wbs-children.is-open > .leaf-node {
+  animation: shatterIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.wbs-children.is-open > *:nth-child(1) {
+  animation-delay: 0.05s;
+}
+
+.wbs-children.is-open > *:nth-child(2) {
+  animation-delay: 0.1s;
+}
+
+.wbs-children.is-open > *:nth-child(3) {
+  animation-delay: 0.15s;
+}
+
+@media (max-width: 560px) {
+  .wbs-tree-container {
+    padding: 0 0.5rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wbs-node {
+    transition: none;
+  }
+
+  .wbs-children {
+    transition: none;
+  }
+
+  .wbs-children.is-open > .wbs-branch,
+  .wbs-children.is-open > .leaf-node {
+    animation: none;
+  }
+}
+
+/* ---- teacher mode: the authoring screen ----
+   Opened by ?admin=true, which js/app.js answers with a body class rather than
+   inline display tweaks, because this project keeps every rule in these files.
+   The section is a .panel for its measure and rhythm only: the card inside is
+   the visible shell, so the panel hands back its own frame. The panel runs wide
+   enough to hold the two-column .tm-builder at its 1000px measure. */
+body.teacher-on .app-layout,
+body.teacher-on .tabbar,
+body.teacher-on .scroll-track {
+  display: none;
+}
+
+#teacherMode {
+  width: 100%;
+  max-width: 1080px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+  background-color: transparent;
+  border-color: transparent;
+  box-shadow: none;
+}
+
+/* Controls on the left, the live card on the right. The .card child-margin
+   rule would offset the second grid item, so the builder hands it back and
+   lets the column gap do the spacing. */
+.tm-builder {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.tm-builder > * + * {
+  margin-top: 0;
+}
+
+.tm-controls h2 {
+  margin-bottom: 0.5rem;
+}
+
+.tm-controls > p {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin-bottom: 1.5rem;
+}
+
+.tm-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.tm-preview h2 {
+  margin: 0;
+}
+
+.tm-hint {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+/* Holds its shape before the first keystroke so the columns do not jump. */
+#tm-preview-container {
+  min-height: 120px;
+}
+
+#tm-copy {
+  align-self: flex-start;
+}
+
+/* The clipboard fallback selects an offscreen buffer; it must not paint or
+   take focus space, and it carries a class so no inline style is needed. */
+.tm-scratch {
+  position: fixed;
+  top: 0;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+@media (max-width: 800px) {
+  .tm-builder {
+    grid-template-columns: 1fr;
+  }
+}
+
+.teacher-link {
+  margin-left: 0.75rem;
+  color: inherit;
+  font-size: 0.8rem;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 0.75rem;
+}
+
+/* Textareas had no box anywhere in this build, so the form gives them the one
+   the inputs already get, sunken because the field holds written prose. */
+.form-group textarea {
+  background-color: var(--bg-sunken);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.form-group textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--ring);
+}
+
+/* ---- chapter 05: the iron triangle ----
+   The band is the shared .cinematic-band like CH01-CH04, so the full bleed, the
+   pin and the domain expansion come from there and this block only dresses the
+   instrument. The triangle wears the theme's accent until the schedule is
+   crushed past what the scope can absorb, then it goes to the alert red. */
+.cinematic-triangle .triangle-layout {
+  display: grid;
+  grid-template-columns: minmax(200px, 300px) minmax(240px, 340px);
+  gap: clamp(1.5rem, 5vw, 4rem);
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-width: 0;
+  text-align: left;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 1s ease, transform 1s ease;
+}
+
+.cinematic-band.is-active .triangle-layout {
+  opacity: 1;
+  transform: translateY(0);
+  transition-delay: 1.5s;
+}
+
+/* Leaving the band rewinds the reveal, so a second visit plays it again. */
+.cinematic-band.is-reset .triangle-layout {
+  opacity: 0;
+  transform: translateY(20px);
+  transition-delay: 0s;
+}
+
+.triangle-visual,
+.triangle-controls {
+  min-width: 0;
+}
+
+.cinematic-triangle .triangle-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.triangle-svg {
+  width: 100%;
+  height: auto;
+  /* The glow lives outside the viewBox; clip it and the halo is cut off. */
+  overflow: visible;
+}
+
+#trianglePath {
+  fill: rgba(124, 58, 237, 0.1);
+  stroke: var(--accent);
+  stroke-width: 4;
+  stroke-linejoin: round;
+  transition: fill 0.3s ease, stroke 0.3s ease, filter 0.3s ease;
+  filter: drop-shadow(0 0 10px var(--accent));
+}
+
+#trianglePath.broken {
+  fill: rgba(239, 68, 68, 0.12);
+  stroke: var(--status-negative);
+  filter: drop-shadow(0 0 20px var(--status-negative));
+  animation: screenShake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+.tri-label {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  fill: var(--cinematic-text);
+}
+
+.triangle-controls .criteria-row label {
+  color: var(--cinematic-text-muted);
+}
+
+/* #333 was tuned for the dark stage; on paper the rail needs the theme's rule. */
+.triangle-controls .criteria-row input[type='range']::-webkit-slider-runnable-track {
+  background: var(--cinematic-rule);
+}
+
+.triangle-controls .criteria-row .val-display {
+  color: var(--cinematic-text);
+  font-family: var(--font-serif);
+  font-size: 1.1rem;
+}
+
+/* Cost and scope are read-only meters: the width comes from a data-value step
+   class so the state stays in the stylesheet instead of an inline style. */
+.triangle-controls .bar-bg {
+  height: 0.55rem;
+  border-radius: 999px;
+  background: var(--cinematic-rule);
+  overflow: hidden;
+}
+
+.triangle-controls .bar-fill {
+  height: 100%;
+  width: 50%;
+  border-radius: inherit;
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
+  transition: width 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.3s ease;
+}
+
+.bar-fill[data-value='0'] { width: 0; }
+.bar-fill[data-value='1'] { width: 10%; }
+.bar-fill[data-value='2'] { width: 20%; }
+.bar-fill[data-value='3'] { width: 30%; }
+.bar-fill[data-value='4'] { width: 40%; }
+.bar-fill[data-value='5'] { width: 50%; }
+.bar-fill[data-value='6'] { width: 60%; }
+.bar-fill[data-value='7'] { width: 70%; }
+.bar-fill[data-value='8'] { width: 80%; }
+.bar-fill[data-value='9'] { width: 90%; }
+.bar-fill[data-value='10'] { width: 100%; }
+
+.tri-status {
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--cinematic-text-muted);
+  transition: color 0.3s ease;
+}
+
+.tri-status.broken {
+  color: var(--status-negative);
+}
+
+/* The trade-off, spelled out under the triangle. It shares the alert red only
+   when the fast end is chosen, the same state that breaks the shape. */
+.triangle-narrative {
+  max-width: 600px;
+  margin-top: 2rem;
+  padding: 1rem;
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+  background-color: rgba(124, 58, 237, 0.1);
+  font-family: var(--font-sans);
+  font-size: 1.1rem;
+  text-align: center;
+  color: var(--cinematic-text);
+  transition: color 0.3s ease, background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.triangle-narrative.broken {
+  /* The ink token, not the signal red: on the 10% wash the bright red reads at
+     2.66:1, while the ink clears AA at 4.57:1. */
+  color: var(--status-negative-ink);
+  background-color: rgba(239, 68, 68, 0.1);
+  border-color: var(--status-negative);
+}
+
+/* The lesson under the CH06/CH08 tools: the same shell as the triangle's
+   narrative, so the why reads as one family across the chapters. */
+.learning-narrative {
+  margin-top: 1.5rem;
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 600px;
+  padding: 1rem;
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+  background: rgba(124, 58, 237, 0.1);
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  text-align: center;
+  color: var(--cinematic-text);
+  transition: all 0.3s;
+}
+
+/* CH08 waits for the first drop; an empty box would read as a broken panel. */
+.learning-narrative:empty {
+  display: none;
+}
+
+.learning-narrative.warning {
+  /* The ink token, not the signal red, for the same AA reason as the triangle. */
+  color: var(--status-negative-ink);
+  border-color: var(--status-negative);
+  background: rgba(239, 68, 68, 0.1);
+}
+
+@keyframes screenShake {
+  10%, 90% { transform: translate3d(-1px, 0, 0); }
+  20%, 80% { transform: translate3d(2px, 0, 0); }
+  30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+  40%, 60% { transform: translate3d(4px, 0, 0); }
+}
+
+@media (max-width: 900px) {
+  /* Stacked, the instrument is taller than one screen. Centring it would push
+     the title under the sticky tab bar and clip it against the band's overflow,
+     so the band starts at the top and grows with its content instead. */
+  .cinematic-triangle {
+    align-items: flex-start;
+    padding: 6rem 1rem 4rem;
+  }
+
+  .cinematic-triangle .triangle-layout {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    text-align: center;
+    justify-items: center;
+  }
+
+  .triangle-visual {
+    width: min(300px, 80vw);
+  }
+
+  .triangle-controls {
+    width: min(420px, 100%);
+    text-align: left;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #trianglePath.broken {
+    animation: none;
+  }
+
+  .cinematic-triangle .triangle-layout {
+    transition: none;
+  }
+}
+
+/* ---- chapter 06: resource leveling ----
+   Three fixed lanes, one pill per task. The pill's left/width are drag
+   geometry (the same inline values CH01's task blocks carry); every colour
+   comes from the cinematic tokens so both stages stay readable. */
+.cinematic-resources {
+  --lane-panel: rgba(0, 0, 0, 0.2);
+  --lane-track: rgba(255, 255, 255, 0.05);
+  --pill-bg: var(--accent);
+  --pill-ink: #fff;
+  --pill-alert: var(--status-negative-ink);
+  --status-good: var(--status-positive-ink);
+  --status-warn: var(--status-negative-ink);
+}
+
+:root[data-theme='dark'] .cinematic-resources {
+  --lane-panel: rgba(255, 255, 255, 0.03);
+  --lane-track: rgba(255, 255, 255, 0.06);
+  /* --accent is pale in the dark stage, so the pill ink flips to near-black. */
+  --pill-ink: #0b0b12;
+  --pill-alert: var(--status-negative);
+  --status-good: var(--status-positive);
+  --status-warn: var(--status-negative);
+}
+
+.resource-grid-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
+  max-width: 900px;
+  margin-top: 2rem;
+  padding: 2rem;
+  background: var(--lane-panel);
+  border: 1px solid var(--cinematic-rule);
+  border-radius: var(--radius);
+}
+
+.resource-lane {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  height: 50px;
+}
+
+.lane-label {
+  width: 120px;
+  flex: none;
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--cinematic-text-muted);
+  text-transform: uppercase;
+  text-align: right;
+}
+
+.lane-track {
+  position: relative;
+  flex: 1;
+  height: 100%;
+  background: var(--lane-track);
+  border-radius: 4px;
+  border-left: 1px solid var(--accent);
+}
+
+.task-pill {
+  position: absolute;
+  top: 5px;
+  bottom: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 0.4rem;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  border-radius: 4px;
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--pill-ink);
+  background: var(--pill-bg);
+  border: 1px solid var(--cinematic-rule);
+  box-shadow: 0 0 10px var(--cinematic-glow);
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+  transition: box-shadow 0.2s, transform 0.2s, background 0.2s;
+}
+
+.task-pill:active,
+.task-pill.is-dragging {
+  cursor: grabbing;
+  transform: scale(1.02);
+  z-index: 2;
+}
+
+.task-pill:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.task-pill.overallocated {
+  background: var(--pill-alert);
+  border-color: var(--cinematic-text);
+  box-shadow: 0 0 20px var(--pill-alert);
+}
+
+.resource-status {
+  margin-top: 2rem;
+  font-family: var(--font-sans);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--status-good);
+  transition: color 0.3s ease;
+}
+
+.resource-status.warning {
+  color: var(--status-warn);
+}
+
+@media (max-width: 900px) {
+  .cinematic-resources {
+    align-items: flex-start;
+    padding: 6rem 1rem 4rem;
+  }
+
+  .resource-grid-container {
+    margin-top: 0;
+    padding: 1rem;
+    gap: 1rem;
+  }
+
+  .resource-lane {
+    gap: 0.6rem;
+    height: 46px;
+  }
+
+  .lane-label {
+    width: 64px;
+    font-size: 0.62rem;
+    letter-spacing: 0.04em;
+  }
+
+  .task-pill {
+    font-size: 0.62rem;
+    padding: 0 0.25rem;
+  }
+
+  .resource-status {
+    margin-top: 1.25rem;
+    font-size: 0.95rem;
+    text-align: center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .task-pill {
+    transition: none;
+  }
+
+  .task-pill:active,
+  .task-pill.is-dragging {
+    transform: none;
+  }
+}
+
+/* ---- chapter 11: Tuckman team stages ----
+   Five dots are the smallest group that can show a pattern: scattered, then
+   colliding, then sharing an orbit, then locked into one rotation. */
+.team-simulation-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+  width: 100%;
+  max-width: 800px;
+  margin-top: 2rem;
+}
+
+#teamCanvas {
+  display: block;
+  width: 100%;
+  height: 400px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+}
+
+.team-controls {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* The accent carries white on the light skin but sits on near-black in dark,
+   which is what --accent-contrast is for. */
+.team-controls .btn-nav.active {
+  background: var(--accent);
+  color: var(--accent-contrast);
+  border-color: var(--accent);
+}
+
+.team-narrative {
+  text-align: center;
+  font-family: var(--font-serif);
+  font-size: 1.1rem;
+  color: var(--cinematic-text);
+  max-width: 600px;
+  min-height: 3rem;
+  transition: opacity 0.3s;
+}
+
+@media (max-width: 560px) {
+  .team-simulation-container {
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+  }
+
+  .team-controls {
+    gap: 0.6rem;
+  }
+
+  .team-controls .btn-nav {
+    padding: 0.6rem 0.9rem;
+    font-size: 0.85rem;
+  }
+
+  .team-narrative {
+    font-size: 1rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .team-narrative {
+    transition: none;
+  }
+}
+
+/* ---- chapter 08: risk heat map ----
+   Nine cells, three draggable risks. Rows run high to low impact top to bottom,
+   columns low to high likelihood left to right; a cell's zone is the weaker of
+   its two axes, so the green low-risk band hugs the bottom and left edges and
+   only the high/high corner burns red. Axis titles sit in the gutters. */
+.risk-layout {
+  position: relative;
+  display: flex;
+  gap: 2rem;
+  align-items: flex-start;
+  margin-top: 2rem;
+  width: 100%;
+  max-width: 900px;
+  padding-left: 40px;
+  padding-bottom: 40px;
+}
+
+.risk-y-axis,
+.risk-x-axis {
+  position: absolute;
+  font-family: var(--font-sans);
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 0.12em;
+  color: var(--cinematic-text-muted);
+  pointer-events: none;
+}
+
+/* Vertical gutter label, centred on the matrix rather than the whole layout
+   (the 40px bottom gutter would otherwise pull it below the grid). */
+.risk-y-axis {
+  left: 0;
+  top: calc((100% - 40px) / 2);
+  writing-mode: vertical-rl;
+  transform: translateY(-50%) rotate(180deg);
+}
+
+/* Spans exactly the matrix column (the 2 of the 2:1 flex split) so the title
+   sits under the grid, not under the grid-plus-pool. */
+.risk-x-axis {
+  bottom: 0;
+  left: 40px;
+  width: calc((100% - 40px - 2rem) * 2 / 3);
+  text-align: center;
+}
+
+.risk-matrix {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 80px);
+  gap: 4px;
+  padding: 4px;
+  flex: 2;
+  background: var(--cinematic-rule);
+  border-radius: var(--radius);
+}
+
+.risk-cell {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-radius: 4px;
+  background: var(--bg-card);
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  color: var(--cinematic-text-muted);
+  text-transform: uppercase;
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+
+.risk-cell[data-zone='low'] {
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.risk-cell[data-zone='med'] {
+  background: rgba(217, 119, 6, 0.15);
+  border: 1px solid rgba(217, 119, 6, 0.3);
+}
+
+.risk-cell[data-zone='high'] {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+/* Zone watermark behind the bubble: empty cells read Low/Med/High; an occupied
+   cell's label is swapped for the risk name but the opaque bubble covers it, so
+   the name never prints twice. */
+.risk-cell::before {
+  content: attr(data-zone-label);
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  opacity: 0.5;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.risk-cell.drag-over {
+  /* Outline, not border: a border would reflow the 3x3 grid mid-drag. */
+  outline: 2px dashed var(--accent);
+  outline-offset: -3px;
+  box-shadow: 0 0 16px var(--cinematic-glow);
+}
+
+.risk-pool {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.risk-bubble {
+  padding: 0.75rem 1rem;
+  border-radius: 20px;
+  background: var(--bg-card);
+  border: 1px solid var(--cinematic-rule);
+  box-shadow: var(--shadow);
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 0.8rem;
+  color: var(--cinematic-text);
+  cursor: grab;
+  user-select: none;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.risk-bubble:active {
+  cursor: grabbing;
+  transform: scale(0.95);
+}
+
+.risk-bubble.risk-high {
+  border: 2px solid var(--status-negative);
+  box-shadow: 0 0 20px var(--status-negative);
+  color: var(--status-negative-ink);
+}
+
+:root[data-theme='dark'] .risk-bubble.risk-high {
+  color: var(--status-negative);
+}
+
+/* Inside a cell the bubble has to shrink to the 80px row. */
+.risk-cell .risk-bubble {
+  position: relative;
+  z-index: 1;
+  max-width: 100%;
+  padding: 0.35rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.66rem;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.risk-status {
+  margin-top: 2rem;
+  font-family: var(--font-sans);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--cinematic-text-muted);
+  transition: color 0.3s ease;
+}
+
+.risk-status.warning {
+  color: var(--status-negative-ink);
+}
+
+:root[data-theme='dark'] .risk-status.warning {
+  color: var(--status-negative);
+}
+
+@media (max-width: 900px) {
+  .cinematic-risks {
+    align-items: flex-start;
+    padding: 6rem 1rem 4rem;
+  }
+
+  .risk-layout {
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-top: 0;
+    align-items: stretch;
+  }
+
+  .risk-matrix {
+    grid-template-rows: repeat(3, 68px);
+  }
+
+  .risk-x-axis {
+    width: calc(100% - 40px);
+  }
+
+  /* Matrix is 3x68px rows + 8px gaps + 8px padding = 220px; centre on it. */
+  .risk-y-axis {
+    top: 110px;
+  }
+
+  .risk-pool {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .risk-status {
+    margin-top: 1.25rem;
+    font-size: 0.95rem;
+    text-align: center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .risk-cell,
+  .risk-bubble,
+  .risk-status {
+    transition: none;
+  }
+}
+
+/* ---- chapter 13: organizational structure ----
+   One canvas, two reporting geometries. Staff fly between a department
+   column and a central project team while the reporting lines crossfade. */
+.org-toggle {
+  display: flex;
+  gap: 1rem;
+  margin: 2rem 0;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* --accent-contrast keeps the dark plate's ink readable; white would sit at
+   about 2:1 on the dark accent. */
+.org-toggle .btn-nav.active {
+  background: var(--accent);
+  color: var(--accent-contrast);
+  border-color: var(--accent);
+}
+
+.org-visual {
+  width: 100%;
+  max-width: 600px;
+  height: 400px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+}
+
+#orgCanvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.org-narrative {
+  text-align: center;
+  font-family: var(--font-serif);
+  color: var(--cinematic-text);
+  max-width: 600px;
+  margin-top: 1rem;
+  min-height: 3rem;
+}
+
+@media (max-width: 560px) {
+  .org-toggle {
+    gap: 0.6rem;
+    margin: 1.5rem 0;
+  }
+
+  .org-toggle .btn-nav {
+    padding: 0.6rem 0.9rem;
+    font-size: 0.85rem;
+  }
+
+  .org-narrative {
+    font-size: 0.95rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .org-toggle .btn-nav {
+    transition: none;
+  }
+}

@@ -1,0 +1,672 @@
+/* =============================================================
+   PM Tools · Modern Academic theme
+   Light is the default; <html data-theme="dark"> swaps tokens.
+   This file owns tokens, base type and component skins.
+   Structure + spacing live in layout.css, notes in notes.css.
+   ============================================================= */
+
+/* ---- shared tokens (theme independent) ---- */
+:root {
+  --radius: 6px;
+  --radius-pill: 999px;
+  --font-sans: 'Lato', system-ui, sans-serif;
+  --font-serif: 'Playfair Display', Georgia, serif;
+  /* The pair every component rule reaches for: prose on the sans, the top of the
+     hierarchy on the serif. */
+  --font-body: var(--font-sans);
+  --font-display: var(--font-serif);
+  --dur: 200ms;
+  --noise-texture: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+}
+
+/* ---- light: soft lavender paper, deep indigo ink, one amber signal ---- */
+:root,
+:root[data-theme='light'] {
+  color-scheme: light;
+  --bg-main: #f8f6fc;
+  --bg-gradient-top: #ebe7f5;
+  --bg-card: #ffffff;
+  --bg-sunken: #f1ecf7;
+  --text-primary: #1e1b2e;
+  --text-secondary: #4b486a;
+  --text-muted: #666283;
+  --accent: #4c1d95;
+  --accent-hover: #5b21b6;
+  --accent-secondary: #d97706;
+  --accent-ink: #4c1d95;
+  --accent-contrast: #ffffff;
+  --tint: rgba(76, 29, 149, 0.06);
+  --tint-strong: rgba(76, 29, 149, 0.14);
+  --ring: rgba(76, 29, 149, 0.25);
+  --status-positive: #10b981;
+  --status-positive-ink: #047857;
+  --status-positive-tint: rgba(16, 185, 129, 0.12);
+  --status-negative: #ef4444;
+  --status-negative-ink: #b91c1c;
+  --status-negative-strong: #8b0000;
+  --status-negative-tint: rgba(239, 68, 68, 0.1);
+  --border: #cbd5e1;
+  --shadow: 0 10px 15px -3px rgba(76, 29, 149, 0.08), 0 4px 6px -4px rgba(76, 29, 149, 0.05);
+
+  /* ---- cinematic scenes ----
+     The four bands are an island of their own: they are scenes, not paper, so
+     they carry their own ink, grid, rule and glow instead of borrowing the
+     page's. Dark keeps the values the bands were built with; light gets the
+     cream stage with dark ink. */
+  --cinematic-bg: #e9e2f5;
+  --cinematic-bg-core: #faf7fd;
+  --cinematic-grid: rgba(0, 0, 0, 0.08);
+  --cinematic-rule: rgba(30, 27, 46, 0.18);
+  --cinematic-text: #1e1b2e;
+  --cinematic-text-muted: #4b486a;
+  --cinematic-glow: rgba(217, 119, 6, 0.2);
+  --cinematic-glow-settled: rgba(217, 119, 6, 0.12);
+}
+
+/* ---- dark: the same document, read at night ---- */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --bg-main: #0f172a;
+  --bg-gradient-top: #080c14;
+  --bg-card: #1e293b;
+  --bg-sunken: #0b1120;
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #8a93a8;
+  --accent: #a78bfa;
+  --accent-hover: #c4b5fd;
+  --accent-secondary: #fbbf24;
+  --accent-ink: #c4b5fd;
+  --accent-contrast: #172033;
+  --tint: rgba(167, 139, 250, 0.12);
+  --tint-strong: rgba(167, 139, 250, 0.24);
+  --ring: rgba(167, 139, 250, 0.38);
+  --status-positive: #34d399;
+  --status-positive-ink: #34d399;
+  --status-positive-tint: rgba(52, 211, 153, 0.16);
+  --status-negative: #f87171;
+  --status-negative-ink: #f87171;
+  --status-negative-strong: #fca5a5;
+  --status-negative-tint: rgba(248, 113, 113, 0.16);
+  --border: #334155;
+  --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.45), 0 4px 6px -4px rgba(0, 0, 0, 0.35);
+
+  /* The deep space stage, spelled out once so the bands stop hardcoding it.
+     The core is purple, not red: nothing about the schedule should tint it. */
+  --cinematic-bg: #050508;
+  --cinematic-bg-core: #171033;
+  --cinematic-grid: rgba(255, 255, 255, 0.03);
+  --cinematic-rule: rgba(255, 255, 255, 0.1);
+  --cinematic-text: #f8fafc;
+  --cinematic-text-muted: #94a3b8;
+  --cinematic-glow: rgba(124, 58, 237, 0.3);
+  --cinematic-glow-settled: rgba(124, 58, 237, 0.18);
+}
+
+/* ---- reset ---- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  background-color: var(--bg-main);
+  -webkit-text-size-adjust: 100%;
+  /* Anchors and the hero CTA glide; the JS still passes its own behaviour
+     where it needs to override this. */
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+body {
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+  line-height: 1.65;
+  color: var(--text-primary);
+  /* The page's paint moved to .global-grid-overlay, which carries the same
+     wash and grain plus the grid, one fixed plane under the star canvas. A
+     negative-z layer cannot show through an opaque body, so the body hands the
+     colour over and keeps only its own text colour. */
+  background-image: none;
+  background-color: transparent;
+  transition: color var(--dur) ease;
+}
+
+::selection {
+  background: var(--tint-strong);
+  color: var(--text-primary);
+}
+
+/* ---- typography ---- */
+h1,
+h2,
+h3,
+h4 {
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--text-primary);
+}
+
+h3,
+h4 {
+  font-weight: 600;
+}
+
+/* Playfair announces, Lato explains. The display face carries the top of the
+   hierarchy; the tracked uppercase labels under it stay in the sans. */
+h1,
+h2,
+h3,
+.hero-title,
+.site-title {
+  font-family: var(--font-serif);
+  letter-spacing: -0.01em;
+}
+
+/* Interface text never inherits the display face, wherever it sits in the tree. */
+button,
+input,
+select,
+.tab,
+.sidebar-link,
+.btn-nav {
+  font-family: var(--font-sans);
+}
+
+p {
+  color: var(--text-secondary);
+}
+
+strong {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.site-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--text-primary);
+}
+
+.site-subtitle {
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  margin-top: 6px;
+}
+
+/* Panel and block headings: scholarly serif over a hairline rule. */
+.panel-title,
+.section-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  color: var(--text-primary);
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.panel-title {
+  font-size: 1.12rem;
+  letter-spacing: 0.05em;
+}
+
+.section-title {
+  font-size: 0.98rem;
+  letter-spacing: 0.04em;
+  color: var(--accent-ink);
+}
+
+.site-footer {
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* ---- cards ---- */
+.card,
+.panel,
+.result-card,
+.fcac-section {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  transition: background-color var(--dur) ease, border-color var(--dur) ease,
+    box-shadow var(--dur) ease;
+}
+
+/* ---- tabs ---- */
+.tab {
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: color var(--dur) ease, border-color var(--dur) ease;
+}
+
+.tab:hover {
+  color: var(--text-primary);
+  border-bottom-color: var(--tint-strong);
+}
+
+.tab.active {
+  font-weight: 600;
+  color: var(--accent-ink);
+  border-bottom-color: var(--accent);
+}
+
+/* ---- fields ---- */
+label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+input,
+select,
+textarea,
+button {
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+}
+
+input,
+select {
+  color: var(--text-primary);
+  background-color: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  transition: border-color var(--dur) ease, box-shadow var(--dur) ease;
+}
+
+input::placeholder {
+  color: var(--text-muted);
+}
+
+input[type='number'] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+  font-variant-numeric: tabular-nums;
+}
+
+input[type='number']::-webkit-inner-spin-button,
+input[type='number']::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input:disabled,
+select:disabled {
+  color: var(--text-muted);
+  background-color: var(--bg-sunken);
+  cursor: not-allowed;
+}
+
+option {
+  background-color: var(--bg-card);
+  color: var(--text-primary);
+}
+
+input:focus,
+select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--ring);
+}
+
+/* ---- radios ---- */
+input[type='radio'] {
+  appearance: none;
+  -webkit-appearance: none;
+  display: grid;
+  place-content: center;
+  flex: none;
+  width: 16px;
+  height: 16px;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition: border-color var(--dur) ease, box-shadow var(--dur) ease;
+}
+
+input[type='radio']::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-pill);
+  background-color: var(--accent);
+  transform: scale(0);
+  transition: transform var(--dur) ease;
+}
+
+input[type='radio']:hover,
+input[type='radio']:checked {
+  border-color: var(--accent);
+}
+
+input[type='radio']:checked::before {
+  transform: scale(1);
+}
+
+input[type='radio']:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--ring);
+}
+
+/* ---- buttons ---- */
+.btn-primary,
+.btn-reset {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: background-color var(--dur) ease, color var(--dur) ease,
+    border-color var(--dur) ease;
+}
+
+.btn-primary {
+  background-color: var(--accent);
+  color: var(--accent-contrast);
+  border: 1px solid var(--accent);
+}
+
+.btn-primary:hover {
+  background-color: var(--accent-hover);
+  border-color: var(--accent-hover);
+}
+
+/* Reset wipes the whole workbook, so it stays quiet until hovered. */
+.btn-reset {
+  background-color: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+}
+
+.btn-reset:hover {
+  color: var(--status-negative-ink);
+  background-color: var(--status-negative-tint);
+  border-color: var(--status-negative);
+}
+
+:where(button, a, [tabindex]):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ---- theme toggle ---- */
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  background-color: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: background-color var(--dur) ease, border-color var(--dur) ease,
+    color var(--dur) ease;
+}
+
+.theme-toggle:hover {
+  color: var(--accent-ink);
+  background-color: var(--tint);
+  border-color: var(--accent);
+}
+
+/* Floating, because the theme is a reading preference, not a masthead action:
+   it stays reachable at any point in a 4500px chapter. */
+#themeToggle {
+  position: fixed;
+  bottom: 24px;
+  left: 24px;
+  z-index: 1000;
+  box-shadow: var(--shadow);
+}
+
+/* ---- table ---- */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+
+thead th {
+  text-align: right;
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--text-secondary);
+  background-color: var(--bg-sunken);
+  border-bottom: 1px solid var(--border);
+}
+
+thead th:first-child {
+  text-align: left;
+}
+
+tbody td {
+  text-align: right;
+  white-space: nowrap;
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border);
+  transition: background-color var(--dur) ease;
+}
+
+tbody td:first-child {
+  text-align: left;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+tbody tr:hover td {
+  background-color: var(--tint);
+}
+
+tbody input {
+  text-align: right;
+}
+
+tfoot td {
+  text-align: right;
+  font-weight: 700;
+  color: var(--text-primary);
+  background-color: var(--bg-sunken);
+  border-top: 2px solid var(--border);
+}
+
+tfoot td:first-child {
+  text-align: left;
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+/* Earned value is derived, not typed: mark it with the accent. */
+.ev-cell {
+  font-weight: 600;
+  color: var(--accent-ink);
+}
+
+/* ---- result tiles ---- */
+.result-card {
+  gap: 6px;
+  background-color: var(--bg-main);
+  box-shadow: none;
+}
+
+.result-label {
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.result-value {
+  /* Playfair sets its numbers as text figures by default — charming in a section
+     title, wrong in a result card. The calculator stays on the sans. */
+  font-family: var(--font-body);
+  font-size: 1.6rem;
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  /* Insurance for the serif fallback: Georgia's default figures are old-style. */
+  font-variant-numeric: lining-nums tabular-nums;
+  color: var(--text-primary);
+  word-break: break-word;
+}
+
+.result-formula {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+/* ---- status chips ---- */
+.status {
+  display: inline-block;
+  width: fit-content;
+  padding: 2px 10px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--text-secondary);
+  background-color: var(--bg-sunken);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+}
+
+.status.good,
+.status--under-budget {
+  color: var(--status-positive-ink);
+  background-color: var(--status-positive-tint);
+}
+
+.status.bad,
+.status--over-budget {
+  color: var(--status-negative-ink);
+  background-color: var(--status-negative-tint);
+}
+
+.status.hidden {
+  display: none;
+}
+
+/* ---- forecast method block ---- */
+.fcac-section {
+  background-color: var(--bg-main);
+  box-shadow: none;
+}
+
+.radio-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text-primary);
+  background-color: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: border-color var(--dur) ease, background-color var(--dur) ease;
+}
+
+.radio-option:hover {
+  border-color: var(--accent);
+}
+
+.radio-option:has(input:checked) {
+  border-color: var(--accent);
+  background-color: var(--tint);
+}
+
+.radio-option span {
+  font-size: 0.85rem;
+  color: var(--text-primary);
+}
+
+.reestimate-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  transition: border-color var(--dur) ease, background-color var(--dur) ease;
+}
+
+.reestimate-row.active {
+  border-color: var(--accent);
+  background-color: var(--tint);
+}
+
+/* ---- scorecard ---- */
+.card {
+  background-color: var(--bg-main);
+  box-shadow: none;
+}
+
+.points-cell {
+  font-weight: 600;
+  color: var(--accent-ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.btn-remove {
+  background: none;
+  border: none;
+  padding: 0 8px;
+  font-size: 1.25rem;
+  line-height: 1;
+  color: var(--status-negative-ink);
+  cursor: pointer;
+  transition: color var(--dur) ease;
+}
+
+.btn-remove:hover {
+  color: var(--status-negative-strong);
+}
+
+.btn-remove:disabled {
+  color: var(--text-muted);
+  cursor: not-allowed;
+}
+
+/* ---- motion preferences ---- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 1ms !important;
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}

@@ -1,0 +1,370 @@
+/* =============================================================
+   PM Tools · chapter notes
+   Reading column, definition blocks, lists, and the two grids.
+   ============================================================= */
+
+/* Prose keeps a book measure; the grids below are exhibits and may run wider.
+   The sheet itself is sized by .panel:has(.notes) in layout.css. */
+/* The chapter reads as a board of cards, not a run-on page. */
+.notes-content {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.note-block {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  box-shadow: var(--shadow);
+  opacity: 0.25;
+  filter: blur(4px);
+  transform: translateY(30px) scale(0.98);
+  transition: opacity 0.6s cubic-bezier(0.2, 0.8, 0.2, 1),
+    filter 0.6s cubic-bezier(0.2, 0.8, 0.2, 1),
+    transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1),
+    border-color var(--dur) ease, box-shadow var(--dur) ease;
+}
+
+/* Only the cards still waiting to be read hold a compositor layer. Once the
+   reveal lands, the promotion goes with it: a whole chapter of permanently
+   promoted cards is GPU memory spent on nothing. */
+.note-block:not(.is-visible) {
+  will-change: opacity, filter, transform;
+}
+
+/* js/app.js clears a card once its top edge reaches the observer band, which
+   is the same viewport line, so a crossing is always the moment the state
+   changes. Cards above the band stay clear: read text never fogs again. */
+.note-block.is-visible {
+  opacity: 1;
+  filter: blur(0);
+  transform: translateY(0) scale(1);
+}
+
+.note-block:hover {
+  border-color: var(--accent);
+}
+
+.note-block.is-visible:hover {
+  transform: translateY(-4px) scale(1);
+}
+
+/* The lift is decoration; the border colour still reports the hover. */
+@media (prefers-reduced-motion: reduce) {
+  .note-block {
+    opacity: 1;
+    filter: none;
+    transform: none;
+    transition: border-color var(--dur) ease, box-shadow var(--dur) ease;
+  }
+
+  /* Matches the scoped promotion below, which would otherwise outrank this. */
+  .note-block,
+  .note-block:not(.is-visible) {
+    will-change: auto;
+  }
+
+  .note-block.is-visible,
+  .note-block.is-visible:hover {
+    transform: none;
+  }
+}
+
+/* An exhibit needs the whole board: a four-up grid inside a 370px card is
+   unreadable, so those blocks span every column. */
+.note-block:has(.constraints),
+.note-block:has(.lifecycle) {
+  grid-column: 1 / -1;
+}
+
+.note-block > p,
+.definition,
+.attr-list,
+.numbered-list,
+.note-caption {
+  max-width: 62ch;
+}
+
+.note-block h2 {
+  font-size: 1.05rem;
+  letter-spacing: 0.05em;
+  color: var(--accent-ink);
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 18px;
+}
+
+/* Cards carry their own edge, so the last list row needs no rule of its own. */
+.note-block > :last-child {
+  margin-bottom: 0;
+}
+
+/* Chapter subheadings stay in the sans so serif marks the hierarchy top. */
+.note-block h3 {
+  font-family: var(--font-body);
+  font-size: 0.76rem;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin: 22px 0 8px;
+}
+
+.note-block p {
+  font-size: 1rem;
+  line-height: 1.7;
+}
+
+/* ---- definition block ---- */
+.definition {
+  position: relative;
+  padding: 14px 18px;
+  background-color: var(--bg-sunken);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  color: var(--text-primary);
+  font-size: 0.98rem;
+  line-height: 1.75;
+}
+
+.definition::before {
+  content: 'Definition';
+  display: block;
+  font-family: var(--font-body);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent-ink);
+  margin-bottom: 6px;
+}
+
+/* ---- lists ---- */
+.attr-list,
+.numbered-list {
+  list-style: none;
+}
+
+.attr-list li {
+  position: relative;
+  padding: 7px 0 7px 22px;
+  color: var(--text-secondary);
+  font-size: 0.98rem;
+  line-height: 1.65;
+  border-bottom: 1px solid var(--border);
+}
+
+.attr-list li:last-child {
+  border-bottom: none;
+}
+
+.attr-list li::before {
+  content: '';
+  position: absolute;
+  left: 3px;
+  top: 0.82em;
+  width: 5px;
+  height: 5px;
+  background-color: var(--accent);
+  border-radius: var(--radius-pill);
+}
+
+.numbered-list {
+  counter-reset: step;
+}
+
+.numbered-list li {
+  counter-increment: step;
+  position: relative;
+  padding: 9px 0 9px 40px;
+  color: var(--text-secondary);
+  font-size: 0.98rem;
+  line-height: 1.65;
+  border-bottom: 1px solid var(--border);
+}
+
+.numbered-list li:last-child {
+  border-bottom: none;
+}
+
+.numbered-list li::before {
+  content: counter(step, decimal-leading-zero);
+  position: absolute;
+  left: 0;
+  top: 9px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent-ink);
+}
+
+/* ---- marginal note ---- */
+.note-caption {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 0.9rem;
+  line-height: 1.7;
+  color: var(--text-muted);
+  margin-top: 16px;
+}
+
+/* ---- grids: 1px gaps draw the hairlines, so columns can reflow freely ---- */
+.constraints,
+.lifecycle {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1px;
+  margin: 18px 0;
+  background-color: var(--border);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.constraint,
+.lifecycle > div {
+  background-color: var(--bg-main);
+  transition: background-color var(--dur) ease;
+}
+
+.constraint {
+  padding: 14px 16px;
+}
+
+/* Charter elements read as a checklist: two columns, tighter cells. */
+.constraints--pairs {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.constraints--pairs .constraint {
+  padding: 11px 16px;
+}
+
+/* The grid paints its hairlines from its own background, so an odd final cell
+   must span the row instead of leaving that colour exposed as a block. */
+.constraints--pairs > .constraint:last-child:nth-child(odd) {
+  grid-column: 1 / -1;
+}
+
+.lifecycle > div {
+  padding: 16px;
+}
+
+.c-label {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--accent-ink);
+}
+
+.c-desc {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+.phase-num {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+}
+
+.phase-name {
+  display: block;
+  margin: 6px 0 8px;
+  font-family: var(--font-display);
+  font-size: 1.02rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.phase-body {
+  display: block;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+/* ---- responsive ---- */
+@media (max-width: 900px) {
+  .constraints,
+  .constraints--pairs,
+  .lifecycle {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  /* The card skin needs its padding at every width; the old full-page rule
+     layout stripped it, which now presses text against the border. */
+  .constraints,
+  .constraints--pairs,
+  .lifecycle {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ---- viewport fog ----
+   The page colour rises from the bottom edge so cards appear to emerge out of
+   the wash. Decorative, click-through, and only ever shown over a notes sheet:
+   the scorecard and the EVM forms keep their full-height clarity. */
+.viewport-fog {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 15vh;
+  pointer-events: none;
+  background: linear-gradient(to top, var(--bg-main) 0%, transparent 100%);
+  z-index: 10;
+  opacity: 0;
+  transition: opacity var(--dur) ease;
+}
+
+body.fog-on .viewport-fog {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .viewport-fog {
+    transition: none;
+  }
+}
+
+/* ---- print ----
+   The reveal is a screen effect: a blurred card prints as a blurred card, and
+   none of the floating chrome belongs on paper. */
+@media print {
+  .note-block {
+    opacity: 1 !important;
+    filter: none !important;
+    transform: none !important;
+    box-shadow: none !important;
+    /* A running reveal transition would otherwise report its in-flight value. */
+    transition: none !important;
+  }
+
+  .note-block,
+  .note-block:not(.is-visible) {
+    will-change: auto;
+  }
+
+  .viewport-fog,
+  .scroll-track,
+  .sidebar,
+  .tabbar,
+  .site-header,
+  .nav-controls,
+  #themeToggle {
+    display: none !important;
+  }
+}
