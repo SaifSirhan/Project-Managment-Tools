@@ -47,6 +47,20 @@
   --status-negative-tint: rgba(239, 68, 68, 0.1);
   --border: #cbd5e1;
   --shadow: 0 10px 15px -3px rgba(76, 29, 149, 0.08), 0 4px 6px -4px rgba(76, 29, 149, 0.05);
+
+  /* ---- cinematic scenes ----
+     The four bands are an island of their own: they are scenes, not paper, so
+     they carry their own ink, grid, rule and glow instead of borrowing the
+     page's. Dark keeps the values the bands were built with; light gets the
+     cream stage with dark ink. */
+  --cinematic-bg: #e9e2f5;
+  --cinematic-bg-core: #faf7fd;
+  --cinematic-grid: rgba(0, 0, 0, 0.08);
+  --cinematic-rule: rgba(30, 27, 46, 0.18);
+  --cinematic-text: #1e1b2e;
+  --cinematic-text-muted: #4b486a;
+  --cinematic-glow: rgba(217, 119, 6, 0.2);
+  --cinematic-glow-settled: rgba(217, 119, 6, 0.12);
 }
 
 /* ---- dark: the same document, read at night ---- */
@@ -76,6 +90,17 @@
   --status-negative-tint: rgba(248, 113, 113, 0.16);
   --border: #334155;
   --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.45), 0 4px 6px -4px rgba(0, 0, 0, 0.35);
+
+  /* The deep space stage, spelled out once so the bands stop hardcoding it.
+     The core is purple, not red: nothing about the schedule should tint it. */
+  --cinematic-bg: #050508;
+  --cinematic-bg-core: #171033;
+  --cinematic-grid: rgba(255, 255, 255, 0.03);
+  --cinematic-rule: rgba(255, 255, 255, 0.1);
+  --cinematic-text: #f8fafc;
+  --cinematic-text-muted: #94a3b8;
+  --cinematic-glow: rgba(124, 58, 237, 0.3);
+  --cinematic-glow-settled: rgba(124, 58, 237, 0.18);
 }
 
 /* ---- reset ---- */
@@ -106,14 +131,13 @@ body {
   font-size: 0.95rem;
   line-height: 1.65;
   color: var(--text-primary);
-  /* A wash from the top of the document down to the page colour, with the 5%
-     grain tiled over it. The grain keeps its own 200px cell; the gradient
-     covers the box. */
-  background-image: var(--noise-texture), linear-gradient(180deg, var(--bg-gradient-top) 0%, var(--bg-main) 100%);
-  background-size: 200px 200px, 100% 100%;
-  background-repeat: repeat, no-repeat;
-  background-color: var(--bg-main);
-  transition: background-color var(--dur) ease, color var(--dur) ease;
+  /* The page's paint moved to .global-grid-overlay, which carries the same
+     wash and grain plus the grid, one fixed plane under the star canvas. A
+     negative-z layer cannot show through an opaque body, so the body hands the
+     colour over and keeps only its own text colour. */
+  background-image: none;
+  background-color: transparent;
+  transition: color var(--dur) ease;
 }
 
 ::selection {

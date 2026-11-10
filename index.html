@@ -60,6 +60,12 @@
   </style>
 </head>
 <body>
+  <!-- The page floor: one fixed grid and one starfield under the whole
+       document, so every sheet and tool floats in the same space. Both are
+       decorative and inert; the bands keep their own fields above them. -->
+  <canvas id="globalStarCanvas" aria-hidden="true"></canvas>
+  <div class="global-grid-overlay" aria-hidden="true"></div>
+
   <header class="site-header">
     <div class="shell">
       <div class="header-id">
@@ -414,6 +420,10 @@
             <p class="cinematic-subtitle">Adjust the weights. The strongest project will rise.</p>
           </div>
 
+          <p class="cinematic-subtitle scale-context">
+            The company has three project options: <strong>A (Website)</strong>, <strong>B (Mobile App)</strong>, and <strong>C (Software Upgrade)</strong>. Adjust the company's priorities below to see which project wins.
+          </p>
+
           <div class="scale-layout">
             <!-- Controls -->
             <div class="scale-controls">
@@ -606,60 +616,6 @@
     <section id="tab-ch04" class="panel" hidden>
       <article class="notes">
         <div class="notes-content">
-          <div class="interactive-wbs" id="wbsWidget">
-            <div class="scale-header">
-              <span class="timeline-title">Interactive: Work Breakdown Structure</span>
-              <span class="timeline-subtitle">Click a node to break it down further.</span>
-            </div>
-
-            <div class="wbs-tree">
-              <!-- Root Node -->
-              <div class="wbs-branch">
-                <button class="wbs-node root-node" data-wbs-target="level1">
-                  <span class="node-title">1.0 Project</span>
-                </button>
-
-                <!-- Level 1 Container -->
-                <div class="wbs-children level-1" id="level1">
-
-                  <!-- L1: Design -->
-                  <div class="wbs-branch">
-                    <button class="wbs-node l1-node" data-wbs-target="design-children">
-                      <span class="node-title">1.1 Design</span>
-                    </button>
-                    <div class="wbs-children level-2" id="design-children">
-                      <button class="wbs-node leaf-node">1.1.1 Wireframes</button>
-                      <button class="wbs-node leaf-node">1.1.2 UI Kit</button>
-                    </div>
-                  </div>
-
-                  <!-- L1: Build -->
-                  <div class="wbs-branch">
-                    <button class="wbs-node l1-node" data-wbs-target="build-children">
-                      <span class="node-title">1.2 Build</span>
-                    </button>
-                    <div class="wbs-children level-2" id="build-children">
-                      <button class="wbs-node leaf-node">1.2.1 Frontend</button>
-                      <button class="wbs-node leaf-node">1.2.2 Backend</button>
-                    </div>
-                  </div>
-
-                  <!-- L1: Test -->
-                  <div class="wbs-branch">
-                    <button class="wbs-node l1-node" data-wbs-target="test-children">
-                      <span class="node-title">1.3 Test</span>
-                    </button>
-                    <div class="wbs-children level-2" id="test-children">
-                      <button class="wbs-node leaf-node">1.3.1 QA</button>
-                      <button class="wbs-node leaf-node">1.3.2 UAT</button>
-                    </div>
-                  </div>
-
-                </div>
-              </div>
-            </div>
-          </div>
-
           <section class="note-block">
             <h2>01 — PROJECT OBJECTIVE</h2>
             <p class="definition">The planning process is based on the project objective. It establishes what is to be accomplished and is often stated in the project charter or RFP.</p>
@@ -721,6 +677,70 @@
           </section>
         </div>
       </article>
+
+      <div class="band-hold">
+        <div class="cinematic-band cinematic-wbs" id="wbsWidget">
+          <div class="domain-bg" aria-hidden="true"></div>
+          <canvas id="wbsCanvas" class="particle-canvas" aria-hidden="true"></canvas>
+
+          <div class="cinematic-content">
+            <div class="timeline-header">
+              <h2 class="cinematic-title">THE WORK BREAKDOWN</h2>
+              <p class="cinematic-subtitle">Click the nodes to shatter the project into manageable pieces.</p>
+            </div>
+
+            <div class="wbs-tree-container">
+              <div class="wbs-tree">
+                <!-- Root Node -->
+                <div class="wbs-branch">
+                  <button class="wbs-node root-node" data-wbs-target="level1">
+                    <span class="node-title">1.0 Project</span>
+                  </button>
+
+                  <!-- Level 1 Container -->
+                  <div class="wbs-children level-1" id="level1">
+
+                    <!-- L1: Design -->
+                    <div class="wbs-branch">
+                      <button class="wbs-node l1-node" data-wbs-target="design-children">
+                        <span class="node-title">1.1 Design</span>
+                      </button>
+                      <div class="wbs-children level-2" id="design-children">
+                        <button class="wbs-node leaf-node">1.1.1 Wireframes</button>
+                        <button class="wbs-node leaf-node">1.1.2 UI Kit</button>
+                      </div>
+                    </div>
+
+                    <!-- L1: Build -->
+                    <div class="wbs-branch">
+                      <button class="wbs-node l1-node" data-wbs-target="build-children">
+                        <span class="node-title">1.2 Build</span>
+                      </button>
+                      <div class="wbs-children level-2" id="build-children">
+                        <button class="wbs-node leaf-node">1.2.1 Frontend</button>
+                        <button class="wbs-node leaf-node">1.2.2 Backend</button>
+                      </div>
+                    </div>
+
+                    <!-- L1: Test -->
+                    <div class="wbs-branch">
+                      <button class="wbs-node l1-node" data-wbs-target="test-children">
+                        <span class="node-title">1.3 Test</span>
+                      </button>
+                      <div class="wbs-children level-2" id="test-children">
+                        <button class="wbs-node leaf-node">1.3.1 QA</button>
+                        <button class="wbs-node leaf-node">1.3.2 UAT</button>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="nav-controls">
         <button type="button" class="btn-nav btn-prev" data-direction="prev">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
@@ -773,6 +793,63 @@
           </section>
         </div>
       </article>
+
+      <div class="band-hold">
+        <div class="cinematic-band cinematic-triangle" id="triangleBand">
+          <div class="domain-bg" aria-hidden="true"></div>
+          <canvas id="triangleCanvas" class="particle-canvas" aria-hidden="true"></canvas>
+
+          <div class="cinematic-content">
+            <div class="timeline-header">
+              <h2 class="cinematic-title">THE IRON TRIANGLE</h2>
+              <p class="cinematic-subtitle">Adjust time. Watch scope and cost react.</p>
+            </div>
+
+            <div class="triangle-layout">
+              <div class="triangle-visual">
+                <svg viewBox="0 0 200 180" class="triangle-svg" role="img" aria-labelledby="triTitle">
+                  <title id="triTitle">The iron triangle: scope, cost and time</title>
+                  <polygon id="trianglePath" points="100,10 190,170 10,170"></polygon>
+                  <text x="100" y="26" class="tri-label" text-anchor="middle">Scope</text>
+                  <text x="186" y="164" class="tri-label" text-anchor="end">Cost</text>
+                  <text x="14" y="164" class="tri-label" text-anchor="start">Time</text>
+                </svg>
+              </div>
+
+              <div class="triangle-controls">
+                <div class="criteria-row">
+                  <label for="tri-time">Time (Speed)</label>
+                  <input type="range" id="tri-time" min="1" max="10" step="1" value="5">
+                  <div class="val-display" id="tri-val-time">5</div>
+                </div>
+
+                <div class="criteria-row">
+                  <label>Cost (Budget)</label>
+                  <div class="bar-bg" role="img" aria-label="Cost: 5 of 10">
+                    <div class="bar-fill" id="bar-cost" data-value="5"></div>
+                  </div>
+                  <div class="val-display" id="tri-val-cost">5</div>
+                </div>
+
+                <div class="criteria-row">
+                  <label>Scope (Features)</label>
+                  <div class="bar-bg" role="img" aria-label="Scope: 5 of 10">
+                    <div class="bar-fill" id="bar-scope" data-value="5"></div>
+                  </div>
+                  <div class="val-display" id="tri-val-scope">5</div>
+                </div>
+
+                <p class="tri-status" id="tri-status" aria-live="polite">THE TRIANGLE HOLDS</p>
+              </div>
+            </div>
+
+            <div class="triangle-narrative" id="triNarrative" aria-live="polite">
+              The project is balanced. Time, Cost, and Scope are aligned.
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="nav-controls">
         <button type="button" class="btn-nav btn-prev" data-direction="prev">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
@@ -806,6 +883,39 @@
           </section>
         </div>
       </article>
+
+      <div class="band-hold">
+        <div class="cinematic-band cinematic-resources" id="resourceBand">
+          <div class="domain-bg" aria-hidden="true"></div>
+          <canvas id="resourceCanvas" class="particle-canvas" aria-hidden="true"></canvas>
+
+          <div class="cinematic-content">
+            <div class="timeline-header">
+              <h2 class="cinematic-title">RESOURCE LEVELING</h2>
+              <p class="cinematic-subtitle">Drag tasks to avoid overallocating your team.</p>
+            </div>
+
+            <div class="resource-grid-container" id="resourceGrid" aria-label="Resource lanes">
+              <div class="resource-lane" data-lane="dev1">
+                <div class="lane-label" id="lane-dev1">Developer 1</div>
+                <div class="lane-track" id="track-dev1" data-lane="dev1" aria-labelledby="lane-dev1"></div>
+              </div>
+              <div class="resource-lane" data-lane="dev2">
+                <div class="lane-label" id="lane-dev2">Developer 2</div>
+                <div class="lane-track" id="track-dev2" data-lane="dev2" aria-labelledby="lane-dev2"></div>
+              </div>
+              <div class="resource-lane" data-lane="designer">
+                <div class="lane-label" id="lane-designer">Designer</div>
+                <div class="lane-track" id="track-designer" data-lane="designer" aria-labelledby="lane-designer"></div>
+              </div>
+            </div>
+
+            <p class="resource-status" id="resourceStatus" role="status">All Resources Leveled</p>
+            <div class="learning-narrative" id="resourceNarrative" aria-live="polite"></div>
+          </div>
+        </div>
+      </div>
+
       <div class="nav-controls">
         <button type="button" class="btn-nav btn-prev" data-direction="prev">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
@@ -821,6 +931,19 @@
     <section id="tab-ch07" class="panel" hidden>
       <h2 class="panel-title">07 · COST PLANNING AND PERFORMANCE CALCULATOR</h2>
 
+      <!-- The calculator is a tool, not a reading sheet: it gets the same
+           full-bleed shell as the scenes, but as a tall band that grows with
+           the table instead of pinning a screenful. -->
+      <div class="cinematic-band tool-band" id="evmBand">
+        <div class="domain-bg" aria-hidden="true"></div>
+
+        <div class="cinematic-content">
+          <div class="timeline-header">
+            <h2 class="cinematic-title">COST &amp; PERFORMANCE</h2>
+            <p class="cinematic-subtitle">Enter the budget and actuals. The heartbeat follows.</p>
+          </div>
+
+          <div class="tool-sheet">
       <div class="top-row">
         <div class="field">
           <label for="tbc">TBC — Total Budget</label>
@@ -877,6 +1000,20 @@
         </div>
       </div>
 
+      <div class="card evm-chart-card" id="evmChartCard">
+        <div class="evm-chart-head">
+          <h3>EVM Heartbeat</h3>
+          <div class="chart-legend">
+            <span><i class="chart-key chart-key--cbc"></i>Planned (CBC)</span>
+            <span><i class="chart-key chart-key--cac"></i>Actual (CAC)</span>
+            <span><i class="chart-key chart-key--cev"></i>Earned (CEV)</span>
+          </div>
+        </div>
+        <div class="chart-container">
+          <canvas id="evmChart" role="img" aria-label="EVM heartbeat: planned cost, actual cost and earned value"></canvas>
+        </div>
+      </div>
+
       <div class="fcac-section">
         <div class="section-title">Forecast Method</div>
         <div class="fcac-options">
@@ -896,6 +1033,10 @@
       </div>
 
       <button type="button" class="btn-reset" id="resetBtn">Reset all</button>
+          </div>
+        </div>
+      </div>
+
       <div class="nav-controls">
         <button type="button" class="btn-nav btn-prev" data-direction="prev">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
@@ -939,6 +1080,31 @@
           </section>
         </div>
       </article>
+
+      <div class="band-hold">
+        <div class="cinematic-band cinematic-risks" id="riskBand">
+          <div class="domain-bg" aria-hidden="true"></div>
+          <canvas id="riskCanvas" class="particle-canvas" aria-hidden="true"></canvas>
+
+          <div class="cinematic-content">
+            <div class="timeline-header">
+              <h2 class="cinematic-title">RISK HEAT MAP</h2>
+              <p class="cinematic-subtitle">Drag the risks to assess their likelihood and impact.</p>
+            </div>
+
+            <div class="risk-layout">
+              <div class="risk-y-axis">Impact</div>
+              <div class="risk-x-axis">Likelihood</div>
+              <div class="risk-matrix" id="riskMatrix" aria-label="Risk matrix: three by three likelihood and impact grid"></div>
+              <div class="risk-pool" id="riskPool" aria-label="Unassessed risks"></div>
+            </div>
+
+            <p class="risk-status" id="riskStatus" role="status">Drag a risk onto the grid to begin.</p>
+            <div class="learning-narrative" id="riskNarrative" aria-live="polite"></div>
+          </div>
+        </div>
+      </div>
+
       <div class="nav-controls">
         <button type="button" class="btn-nav btn-prev" data-direction="prev">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
@@ -961,12 +1127,23 @@
           <section class="note-block">
             <h2>02 — LESSONS LEARNED TRACKER</h2>
             <p>Capture lessons at the time they occur, not just at the end.</p>
-            <div class="interactive-placeholder" id="lessonsTracker">
-              <p class="placeholder-label">[Lessons Learned Log App UI Here]</p>
-            </div>
           </section>
         </div>
       </article>
+
+      <div class="cinematic-band tool-band" id="lessonsBand">
+        <div class="domain-bg" aria-hidden="true"></div>
+        <div class="cinematic-content">
+          <div class="timeline-header">
+            <h2 class="cinematic-title">LESSONS LEARNED</h2>
+            <p class="cinematic-subtitle">Capture the lesson the day it happens, not at closing.</p>
+          </div>
+          <div class="interactive-placeholder" id="lessonsTracker">
+            <p class="placeholder-label">[Lessons Learned Log App UI Here]</p>
+          </div>
+        </div>
+      </div>
+
       <div class="nav-controls">
         <button type="button" class="btn-nav btn-prev" data-direction="prev">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
@@ -994,12 +1171,23 @@
           <section class="note-block">
             <h2>03 — CHANGE CONTROL LOG</h2>
             <p>Manage changes systematically to prevent scope creep.</p>
-            <div class="interactive-placeholder" id="changeLog">
-              <p class="placeholder-label">[Change Control Log App UI Here]</p>
-            </div>
           </section>
         </div>
       </article>
+
+      <div class="cinematic-band tool-band" id="changeBand">
+        <div class="domain-bg" aria-hidden="true"></div>
+        <div class="cinematic-content">
+          <div class="timeline-header">
+            <h2 class="cinematic-title">CHANGE CONTROL</h2>
+            <p class="cinematic-subtitle">Log every change before it becomes scope creep.</p>
+          </div>
+          <div class="interactive-placeholder" id="changeLog">
+            <p class="placeholder-label">[Change Control Log App UI Here]</p>
+          </div>
+        </div>
+      </div>
+
       <div class="nav-controls">
         <button type="button" class="btn-nav btn-prev" data-direction="prev">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
@@ -1022,12 +1210,44 @@
           <section class="note-block">
             <h2>02 — TEAM STAGE QUIZ</h2>
             <p>Test your knowledge of team dynamics.</p>
-            <div class="interactive-placeholder" id="teamQuiz">
-              <p class="placeholder-label">[Team Stage Quiz App UI Here]</p>
-            </div>
           </section>
         </div>
       </article>
+
+      <div class="cinematic-band tool-band" id="quizBand">
+        <div class="domain-bg" aria-hidden="true"></div>
+        <div class="cinematic-content">
+          <div class="timeline-header">
+            <h2 class="cinematic-title">TEAM STAGE QUIZ</h2>
+            <p class="cinematic-subtitle">Forming, storming, norming, performing — find the stage.</p>
+          </div>
+          <div class="interactive-placeholder" id="teamQuiz">
+            <p class="placeholder-label">[Team Stage Quiz App UI Here]</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="cinematic-band tool-band" id="teamBand">
+        <div class="domain-bg" aria-hidden="true"></div>
+        <div class="cinematic-content">
+          <div class="timeline-header">
+            <h2 class="cinematic-title">TEAM DEVELOPMENT</h2>
+            <p class="cinematic-subtitle">Watch how a group of individuals becomes a high-performing team.</p>
+          </div>
+
+          <div class="team-simulation-container">
+            <canvas id="teamCanvas" role="img" aria-label="Five team members shown as dots in the forming stage.">Five dots representing the team.</canvas>
+            <div class="team-controls">
+              <button type="button" class="btn-nav active" id="btn-forming" data-stage="forming" aria-pressed="true">1. Forming</button>
+              <button type="button" class="btn-nav" id="btn-storming" data-stage="storming" aria-pressed="false">2. Storming</button>
+              <button type="button" class="btn-nav" id="btn-norming" data-stage="norming" aria-pressed="false">3. Norming</button>
+              <button type="button" class="btn-nav" id="btn-performing" data-stage="performing" aria-pressed="false">4. Performing</button>
+            </div>
+            <div class="team-narrative" id="teamNarrative" aria-live="polite">Individuals are polite, excited, and uncertain. They rely on the leader for direction.</div>
+          </div>
+        </div>
+      </div>
+
       <div class="nav-controls">
         <button type="button" class="btn-nav btn-prev" data-direction="prev">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
@@ -1083,6 +1303,27 @@
           </section>
         </div>
       </article>
+
+      <div class="cinematic-band tool-band" id="orgBand">
+        <div class="domain-bg" aria-hidden="true"></div>
+        <div class="cinematic-content">
+          <div class="timeline-header">
+            <h2 class="cinematic-title">ORGANIZATIONAL STRUCTURE</h2>
+            <p class="cinematic-subtitle">See how communication flows change between structures.</p>
+          </div>
+
+          <div class="org-toggle">
+            <button type="button" class="btn-nav active" id="btn-functional" aria-pressed="true">Functional</button>
+            <button type="button" class="btn-nav" id="btn-matrix" aria-pressed="false">Matrix</button>
+          </div>
+
+          <div class="org-visual">
+            <canvas id="orgCanvas" role="img" aria-label="Functional org chart: the CEO above engineering and marketing managers, each with four staff in vertical columns.">An organization chart: a CEO, two department managers, and eight staff.</canvas>
+          </div>
+          <div class="org-narrative" id="orgNarrative" aria-live="polite">Functional: Team members report to one department head. Slow response, but deep expertise.</div>
+        </div>
+      </div>
+
       <div class="nav-controls">
         <button type="button" class="btn-nav btn-prev" data-direction="prev">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
@@ -1100,8 +1341,49 @@
   <button id="themeToggle" type="button" class="theme-toggle" aria-label="Switch to dark mode">🌙 Dark</button>
 
   <footer class="site-footer">
-    <div class="shell">STATIC BUILD · NO ACCOUNTS · DATA STAYS IN BROWSER</div>
+    <div class="shell">STATIC BUILD · NO ACCOUNTS · DATA STAYS IN BROWSER<a href="?admin=true" class="teacher-link">Teacher Mode</a></div>
   </footer>
+
+  <!-- Teacher Mode: an authoring screen, not a chapter. It sits outside
+     .app-layout so the tab router never counts it, and ?admin=true is the only
+     thing that opens it. That query is a convenience, not a lock: this screen
+     renders a live preview and copies HTML to the clipboard; it cannot write to
+     the site. The grid, spacing and offscreen copy buffer all live in
+     layout.css (.tm-builder / .tm-scratch) — no inline styles in this build. -->
+  <section id="teacherMode" class="panel" hidden aria-labelledby="tm-heading">
+    <div class="card tm-builder">
+      <div class="tm-controls">
+        <h2 id="tm-heading">Teacher Card Builder</h2>
+        <p>Choose a layout, type your text, and watch the exact card build live.</p>
+
+        <div class="form-group">
+          <label for="tm-style">Card Style</label>
+          <select id="tm-style">
+            <option value="definition">Definition Card</option>
+            <option value="list">Bullet List Card</option>
+            <option value="numbered">Numbered List Card</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="tm-title">Card Title (e.g., 01 — WHAT IS A PROJECT)</label>
+          <input type="text" id="tm-title" value="01 — WHAT IS A PROJECT" placeholder="Enter title" autocomplete="off">
+        </div>
+
+        <div class="form-group">
+          <label for="tm-body">Body</label>
+          <textarea id="tm-body" rows="8" placeholder="Type the definition, or one list item per line...">A project is a temporary endeavor undertaken to create a unique product, service, or result. It has a defined start and end, and is constrained by scope, time, and cost.</textarea>
+        </div>
+      </div>
+
+      <div class="tm-preview">
+        <h2>Live Preview</h2>
+        <p class="tm-hint">This is the exact card students will see. Screenshot it, or copy its HTML below.</p>
+        <div id="tm-preview-container"></div>
+        <button type="button" class="btn-primary" id="tm-copy">Copy HTML to Clipboard</button>
+      </div>
+    </div>
+  </section>
 
   <div class="scroll-track" id="scrollTrack" aria-hidden="true"></div>
   <div class="viewport-fog" aria-hidden="true"></div>

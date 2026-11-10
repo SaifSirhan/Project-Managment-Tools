@@ -26,6 +26,12 @@
     filter 0.6s cubic-bezier(0.2, 0.8, 0.2, 1),
     transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1),
     border-color var(--dur) ease, box-shadow var(--dur) ease;
+}
+
+/* Only the cards still waiting to be read hold a compositor layer. Once the
+   reveal lands, the promotion goes with it: a whole chapter of permanently
+   promoted cards is GPU memory spent on nothing. */
+.note-block:not(.is-visible) {
   will-change: opacity, filter, transform;
 }
 
@@ -53,6 +59,11 @@
     filter: none;
     transform: none;
     transition: border-color var(--dur) ease, box-shadow var(--dur) ease;
+  }
+
+  /* Matches the scoped promotion below, which would otherwise outrank this. */
+  .note-block,
+  .note-block:not(.is-visible) {
     will-change: auto;
   }
 
@@ -340,6 +351,10 @@ body.fog-on .viewport-fog {
     box-shadow: none !important;
     /* A running reveal transition would otherwise report its in-flight value. */
     transition: none !important;
+  }
+
+  .note-block,
+  .note-block:not(.is-visible) {
     will-change: auto;
   }
 

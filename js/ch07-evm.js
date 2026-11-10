@@ -164,6 +164,8 @@
       fcacEl.textContent = '—';
       fcacStatus.className = 'status hidden';
     }
+
+    if (typeof updateEVMChart === 'function') updateEVMChart(totalCBC, totalCAC, totalEV);
   }
 
   function resetAll() {
