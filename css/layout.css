@@ -2255,6 +2255,27 @@ body.teacher-on .scroll-track {
   top: 2rem;
 }
 
+/* A quiet text link back to the student site: no chrome, just a colour shift. */
+.btn-back {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  transition: color 0.2s;
+}
+
+.btn-back:hover {
+  color: var(--accent);
+}
+
 .tm-header h2 {
   font-family: var(--font-serif);
   margin-bottom: 0.5rem;

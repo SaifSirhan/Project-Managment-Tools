@@ -2411,6 +2411,17 @@ function initTeacherMode() {
 
   if (!titleInput || !previewContainer) return;
 
+  // Returning to the student view is a plain navigation: drop the admin flag
+  // and reload, so the teacher-on body class and hidden panel are not reapplied.
+  const backBtn = document.getElementById('tm-back-btn');
+  if (backBtn) {
+    backBtn.addEventListener('click', () => {
+      const url = new URL(window.location.href);
+      url.searchParams.delete('admin');
+      window.location.href = url.toString();
+    });
+  }
+
   const esc = (text) => text.replace(/&/g, '&amp;').replace(/</g, '&lt;');
 
   function generateHTML() {
